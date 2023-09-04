@@ -7,10 +7,7 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"os"
-	"os/signal"
 	"strings"
-	"syscall"
 )
 
 const (
@@ -28,40 +25,25 @@ func main() {
 
 func run() error {
 	log.Println("Start server :8080")
-	gracefulStop()
 	mux := http.NewServeMux()
 	mux.HandleFunc(`/`, handleService)
 	return http.ListenAndServe(`:8080`, mux)
 }
 
-func gracefulStop() {
-	gracefulStopChan := make(chan os.Signal)
-	signal.Notify(
-		gracefulStopChan,
-		syscall.SIGTERM,
-		syscall.SIGINT,
-	)
-	go func() {
-		sig := <-gracefulStopChan
-		log.Printf("Caught signal: %+v\nStop server\n", sig)
-		os.Exit(0)
-	}()
-}
-
 func handleService(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
-		handleEncodeUrl(w, r)
+		handleEncodeURL(w, r)
 		return
 	}
 	if r.Method == http.MethodGet {
-		handleDecodeUrl(w, r)
+		handleDecodeURL(w, r)
 		return
 	}
 	log.Println("Error: invalid request method")
 	w.WriteHeader(http.StatusBadRequest)
 }
 
-func handleEncodeUrl(w http.ResponseWriter, r *http.Request) {
+func handleEncodeURL(w http.ResponseWriter, r *http.Request) {
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		responseError(w, err)
@@ -80,11 +62,11 @@ func handleEncodeUrl(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Request url: %s short code: %s\n", url, code)
 	w.WriteHeader(http.StatusCreated)
 	if _, err = w.Write([]byte(fmt.Sprintf(urlPattern, code))); err != nil {
-		log.Fatal(fmt.Sprintf("Error: %s\n", err.Error()))
+		log.Fatalf("Error: %s\n", err.Error())
 	}
 }
 
-func handleDecodeUrl(w http.ResponseWriter, r *http.Request) {
+func handleDecodeURL(w http.ResponseWriter, r *http.Request) {
 	code := strings.TrimLeft(r.URL.Path, "/")
 	url, err := app.DecodeURL(code)
 	log.Printf("Request short code: %s url: %s", code, url)
