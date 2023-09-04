@@ -76,7 +76,7 @@ func handleEncodeUrl(w http.ResponseWriter, r *http.Request) {
 		responseError(w, errors.New("invalid url in request"))
 		return
 	}
-	code := app.EncodeUrl(url)
+	code := app.EncodeURL(url)
 	log.Printf("Request url: %s short code: %s\n", url, code)
 	w.WriteHeader(http.StatusCreated)
 	if _, err = w.Write([]byte(fmt.Sprintf(urlPattern, code))); err != nil {
@@ -85,8 +85,8 @@ func handleEncodeUrl(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleDecodeUrl(w http.ResponseWriter, r *http.Request) {
-	code, _ := strings.CutPrefix(r.URL.Path, "/")
-	url, err := app.DecodeUrl(code)
+	code := strings.TrimLeft(r.URL.Path, "/")
+	url, err := app.DecodeURL(code)
 	log.Printf("Request short code: %s url: %s", code, url)
 	if err != nil {
 		responseError(w, err)

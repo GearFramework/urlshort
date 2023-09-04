@@ -2,8 +2,8 @@ package app
 
 import "errors"
 
-func DecodeUrl(shortUrl string) (string, error) {
-	url, exists := urls[shortUrl]
+func DecodeURL(shortURL string) (string, error) {
+	url, exists := urls[shortURL]
 	if exists == false {
 		return "", errors.New("invalid short url")
 	}

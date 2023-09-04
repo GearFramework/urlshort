@@ -11,7 +11,7 @@ const (
 	defShortLen = 8
 )
 
-func EncodeUrl(url string) string {
+func EncodeURL(url string) string {
 	code, exists := codes[url]
 	if exists == false {
 		code = getRandomString(defShortLen)
