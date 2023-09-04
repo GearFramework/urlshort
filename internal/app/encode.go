@@ -13,7 +13,7 @@ const (
 
 func EncodeURL(url string) string {
 	code, exists := codes[url]
-	if exists == false {
+	if !exists {
 		code = getRandomString(defShortLen)
 		codes[url] = code
 		urls[code] = url
