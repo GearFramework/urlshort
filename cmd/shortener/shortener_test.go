@@ -88,6 +88,7 @@ func (test *Test) testDecode() {
 	w := httptest.NewRecorder()
 	handleService(w, request)
 	response := w.Result()
+	_ = response.Body.Close()
 	assert.Equal(test.t, test.dec.responseExpected.StatusCode, response.StatusCode)
 	if test.dec.testDec != nil {
 		test.dec.responseActual = RespActualDecode{response, response.StatusCode}
