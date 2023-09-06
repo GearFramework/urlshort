@@ -8,7 +8,7 @@ import (
 
 type Server struct {
 	Conf   *Config
-	Http   *http.Server
+	HTTP   *http.Server
 	Router *gin.Engine
 }
 
@@ -25,12 +25,12 @@ func NewServer(c *Config) *Server {
 }
 
 func (s *Server) Up() error {
-	s.Http = &http.Server{
+	s.HTTP = &http.Server{
 		Addr:    fmt.Sprintf("%s:%d", s.Conf.Host, s.Conf.Port),
 		Handler: s.Router,
 	}
 	fmt.Printf("Start server at the port %d\n", s.Conf.Port)
-	err := s.Http.ListenAndServe()
+	err := s.HTTP.ListenAndServe()
 	if err != nil {
 		fmt.Printf("Failed to Listen and Serve: %v\n", err)
 		return err
