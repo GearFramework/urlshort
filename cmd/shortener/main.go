@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	neturl "net/url"
 	"strings"
 )
 
@@ -54,12 +55,13 @@ func handleEncodeURL(w http.ResponseWriter, r *http.Request) {
 		responseError(w, errors.New("empty url in request"))
 		return
 	}
-	if _, err = r.URL.Parse(url); err != nil {
+	if _, err = neturl.ParseRequestURI(url); err != nil {
 		responseError(w, errors.New("invalid url in request"))
 		return
 	}
 	code := app.EncodeURL(url)
 	log.Printf("Request url: %s short code: %s\n", url, code)
+	w.Header().Set("Content-Type", "text/plain")
 	w.WriteHeader(http.StatusCreated)
 	if _, err = w.Write([]byte(fmt.Sprintf(urlPattern, code))); err != nil {
 		log.Fatalf("Error: %s\n", err.Error())
