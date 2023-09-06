@@ -66,7 +66,7 @@ func (test *Test) test(t *testing.T) {
 func (test *Test) testEncode() {
 	request := httptest.NewRequest(test.enc.requestEncode.Method, "/", strings.NewReader(test.enc.requestEncode.URL))
 	w := httptest.NewRecorder()
-	s := server.NewServer(&server.Config{"localhost", 8080})
+	s := server.NewServer(&server.Config{Host: "localhost", Port: 8080})
 	s.InitRoutes()
 	s.Router.ServeHTTP(w, request)
 	response := w.Result()
@@ -87,7 +87,7 @@ func (test *Test) testEncode() {
 func (test *Test) testDecode() {
 	request := httptest.NewRequest(test.dec.requestDecode.Method, test.dec.requestDecode.URL, nil)
 	w := httptest.NewRecorder()
-	s := server.NewServer(&server.Config{"localhost", 8080})
+	s := server.NewServer(&server.Config{Host: "localhost", Port: 8080})
 	s.InitRoutes()
 	s.Router.ServeHTTP(w, request)
 	response := w.Result()
