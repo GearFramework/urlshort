@@ -1,12 +1,29 @@
 package app
 
-type codesMap map[string]string
-type urlsMap map[string]string
+import (
+	"github.com/GearFramework/urlshort/internal/config"
+)
 
-var codes codesMap
-var urls urlsMap
+type mapCodes map[string]string
+type mapURLs map[string]string
 
-func InitShortener() {
-	codes = make(codesMap, 10)
-	urls = make(urlsMap, 10)
+type ShortApp struct {
+	Conf  *config.ServiceConfig
+	codes mapCodes
+	urls  mapURLs
+}
+
+func NewShortener(conf *config.ServiceConfig) *ShortApp {
+	shortener := ShortApp{Conf: conf}
+	shortener.initApp()
+	return &shortener
+}
+
+func (app *ShortApp) initApp() {
+	app.codes = make(mapCodes, 10)
+	app.urls = make(mapURLs, 10)
+}
+func (app *ShortApp) AddShortly(url, code string) {
+	app.codes[url] = code
+	app.urls[code] = url
 }

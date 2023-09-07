@@ -1,8 +1,10 @@
 package main
 
 import (
-	"github.com/GearFramework/urlshort/cmd/shortener/server"
 	"github.com/GearFramework/urlshort/internal/app"
+	"github.com/GearFramework/urlshort/internal/config"
+	"github.com/GearFramework/urlshort/internal/pkg"
+	"github.com/GearFramework/urlshort/internal/server"
 	"github.com/stretchr/testify/assert"
 	"io"
 	"net/http"
@@ -52,21 +54,21 @@ type RespActualDecode struct {
 	StatusCode int
 }
 
-func (test *Test) test(t *testing.T) {
+func (test *Test) test(t *testing.T, api pkg.ApiShortener) {
 	test.t = t
 	if test.enc != nil {
-		test.testEncode()
+		test.testEncode(api)
 		return
 	}
 	if test.dec != nil {
-		test.testDecode()
+		test.testDecode(api)
 	}
 }
 
-func (test *Test) testEncode() {
+func (test *Test) testEncode(api pkg.ApiShortener) {
 	request := httptest.NewRequest(test.enc.requestEncode.Method, "/", strings.NewReader(test.enc.requestEncode.URL))
 	w := httptest.NewRecorder()
-	s := server.NewServer(&server.Config{Host: "localhost", Port: 8080})
+	s := server.NewServer(&server.Config{Addr: "localhost:8080"}, api)
 	s.InitRoutes()
 	s.Router.ServeHTTP(w, request)
 	response := w.Result()
@@ -80,18 +82,18 @@ func (test *Test) testEncode() {
 	}
 	if response.StatusCode == http.StatusCreated && test.dec != nil {
 		test.dec.requestDecode.URL = string(body)
-		test.testDecode()
+		test.testDecode(api)
 	}
 }
 
-func (test *Test) testDecode() {
+func (test *Test) testDecode(api pkg.ApiShortener) {
 	request := httptest.NewRequest(test.dec.requestDecode.Method, test.dec.requestDecode.URL, nil)
 	w := httptest.NewRecorder()
-	s := server.NewServer(&server.Config{Host: "localhost", Port: 8080})
+	s := server.NewServer(&server.Config{Addr: "localhost:8080"}, api)
 	s.InitRoutes()
 	s.Router.ServeHTTP(w, request)
 	response := w.Result()
-	_ = response.Body.Close()
+	defer response.Body.Close()
 	assert.Equal(test.t, test.dec.responseExpected.StatusCode, response.StatusCode)
 	if test.dec.testDec != nil {
 		test.dec.responseActual = RespActualDecode{response, response.StatusCode}
@@ -155,10 +157,10 @@ func getTests() []Test {
 }
 
 func TestHandleServiceEncode(t *testing.T) {
-	app.InitShortener()
+	a := app.NewShortener(config.ParseFlags())
 	for _, test := range getTests() {
 		t.Run(test.name, func(t *testing.T) {
-			test.test(t)
+			test.test(t, a)
 		})
 	}
 }

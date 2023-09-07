@@ -1,6 +1,7 @@
 package app
 
 import (
+	"fmt"
 	"math/rand"
 	"time"
 )
@@ -11,17 +12,16 @@ const (
 	defShortLen = 8
 )
 
-func EncodeURL(url string) string {
-	code, exists := codes[url]
+func (app *ShortApp) EncodeURL(url string) string {
+	code, exists := app.codes[url]
 	if !exists {
-		code = getRandomString(defShortLen)
-		codes[url] = code
-		urls[code] = url
+		code = app.getRandomString(defShortLen)
+		app.AddShortly(url, code)
 	}
-	return code
+	return fmt.Sprintf("%s/%s", app.Conf.ShortURLHost, code)
 }
 
-func getRandomString(length int) string {
+func (app *ShortApp) getRandomString(length int) string {
 	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
 	b := make([]byte, length)
 	for i := 0; i < length; i++ {
