@@ -9,7 +9,7 @@ import (
 	neturl "net/url"
 )
 
-func EncodeURL(api pkg.ApiShortener, ctx *gin.Context) {
+func EncodeURL(api pkg.APIShortener, ctx *gin.Context) {
 	body, err := io.ReadAll(ctx.Request.Body)
 	defer ctx.Request.Body.Close()
 	if err != nil {

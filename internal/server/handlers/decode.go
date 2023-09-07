@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-func DecodeURL(api pkg.ApiShortener, ctx *gin.Context) {
+func DecodeURL(api pkg.APIShortener, ctx *gin.Context) {
 	code := ctx.Param("code")
 	url, err := api.DecodeURL(code)
 	if err != nil {

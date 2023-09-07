@@ -11,10 +11,10 @@ type Server struct {
 	Conf   *Config
 	HTTP   *http.Server
 	Router *gin.Engine
-	api    pkg.ApiShortener
+	api    pkg.APIShortener
 }
 
-func NewServer(c *Config, api pkg.ApiShortener) *Server {
+func NewServer(c *Config, api pkg.APIShortener) *Server {
 	return &Server{
 		Conf:   c,
 		Router: gin.New(),

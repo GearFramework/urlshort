@@ -1,6 +1,6 @@
 package pkg
 
-type ApiShortener interface {
+type APIShortener interface {
 	EncodeURL(url string) string
 	DecodeURL(shortURL string) (string, error)
 	AddShortly(url, code string)

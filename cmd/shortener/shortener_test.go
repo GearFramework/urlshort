@@ -54,7 +54,7 @@ type RespActualDecode struct {
 	StatusCode int
 }
 
-func (test *Test) test(t *testing.T, api pkg.ApiShortener) {
+func (test *Test) test(t *testing.T, api pkg.APIShortener) {
 	test.t = t
 	if test.enc != nil {
 		test.testEncode(api)
@@ -65,7 +65,7 @@ func (test *Test) test(t *testing.T, api pkg.ApiShortener) {
 	}
 }
 
-func (test *Test) testEncode(api pkg.ApiShortener) {
+func (test *Test) testEncode(api pkg.APIShortener) {
 	request := httptest.NewRequest(test.enc.requestEncode.Method, "/", strings.NewReader(test.enc.requestEncode.URL))
 	w := httptest.NewRecorder()
 	s := server.NewServer(&server.Config{Addr: "localhost:8080"}, api)
@@ -86,7 +86,7 @@ func (test *Test) testEncode(api pkg.ApiShortener) {
 	}
 }
 
-func (test *Test) testDecode(api pkg.ApiShortener) {
+func (test *Test) testDecode(api pkg.APIShortener) {
 	request := httptest.NewRequest(test.dec.requestDecode.Method, test.dec.requestDecode.URL, nil)
 	w := httptest.NewRecorder()
 	s := server.NewServer(&server.Config{Addr: "localhost:8080"}, api)
