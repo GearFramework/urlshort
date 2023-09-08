@@ -11,7 +11,7 @@ import (
 
 func TestEncodeURL(t *testing.T) {
 	if shortener == nil {
-		shortener = NewShortener(config.ParseFlags())
+		shortener = NewShortener(config.GetConfig())
 	}
 	testURLs := []string{
 		"http://ya.ru",
@@ -28,7 +28,7 @@ func TestEncodeURL(t *testing.T) {
 
 func TestEncodeURLExists(t *testing.T) {
 	if shortener == nil {
-		shortener = NewShortener(config.ParseFlags())
+		shortener = NewShortener(config.GetConfig())
 	}
 	shortener.AddShortly("http://ya.ru", "dHGfdhj4")
 	shortener.AddShortly("http://yandex.ru", "78gsshSd")

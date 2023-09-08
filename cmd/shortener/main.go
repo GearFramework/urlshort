@@ -14,8 +14,8 @@ func main() {
 }
 
 func run() error {
-	shortener := app.NewShortener(config.ParseFlags())
-	s := server.NewServer(&server.Config{Addr: shortener.Conf.Host}, shortener)
+	shortener := app.NewShortener(config.GetConfig())
+	s := server.NewServer(&server.Config{Addr: shortener.Conf.Addr}, shortener)
 	s.InitRoutes()
 	return s.Up()
 }

@@ -1,11 +1,13 @@
 package config
 
-import "flag"
+import (
+	"flag"
+)
 
-func ParseFlags() *ServiceConfig {
+func ParseFlags(defaultAddr, defaultShortURL string) *ServiceConfig {
 	var conf ServiceConfig
-	flag.StringVar(&conf.Host, "a", ":8080", "address to run server")
-	flag.StringVar(&conf.ShortURLHost, "b", "http://localhost:8080", "base address to result short URL")
+	flag.StringVar(&conf.Addr, "a", defaultAddr, "address to run server")
+	flag.StringVar(&conf.ShortURLHost, "b", defaultShortURL, "base address to result short URL")
 	flag.Parse()
 	return &conf
 }
