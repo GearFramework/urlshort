@@ -1,8 +1,9 @@
 package main
 
 import (
-	"github.com/GearFramework/urlshort/cmd/shortener/server"
 	"github.com/GearFramework/urlshort/internal/app"
+	"github.com/GearFramework/urlshort/internal/config"
+	"github.com/GearFramework/urlshort/internal/server"
 	"log"
 )
 
@@ -13,8 +14,8 @@ func main() {
 }
 
 func run() error {
-	app.InitShortener()
-	s := server.NewServer(&server.Config{Host: "localhost", Port: 8080})
+	shortener := app.NewShortener(config.ParseFlags())
+	s := server.NewServer(&server.Config{Addr: shortener.Conf.Host}, shortener)
 	s.InitRoutes()
 	return s.Up()
 }
