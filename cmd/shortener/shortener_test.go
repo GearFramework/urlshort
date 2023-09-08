@@ -1,7 +1,8 @@
 package main
 
 import (
-	"fmt"
+	"github.com/GearFramework/urlshort/cmd/shortener/server"
+	"github.com/GearFramework/urlshort/internal/app"
 	"github.com/stretchr/testify/assert"
 	"io"
 	"net/http"
@@ -65,7 +66,9 @@ func (test *Test) test(t *testing.T) {
 func (test *Test) testEncode() {
 	request := httptest.NewRequest(test.enc.requestEncode.Method, "/", strings.NewReader(test.enc.requestEncode.URL))
 	w := httptest.NewRecorder()
-	handleService(w, request)
+	s := server.NewServer(&server.Config{Host: "localhost", Port: 8080})
+	s.InitRoutes()
+	s.Router.ServeHTTP(w, request)
 	response := w.Result()
 	body, err := io.ReadAll(response.Body)
 	defer response.Body.Close()
@@ -82,11 +85,11 @@ func (test *Test) testEncode() {
 }
 
 func (test *Test) testDecode() {
-	fmt.Println("TEST NAME " + test.name)
-	fmt.Println("METHOD DECODE " + test.dec.requestDecode.Method)
 	request := httptest.NewRequest(test.dec.requestDecode.Method, test.dec.requestDecode.URL, nil)
 	w := httptest.NewRecorder()
-	handleService(w, request)
+	s := server.NewServer(&server.Config{Host: "localhost", Port: 8080})
+	s.InitRoutes()
+	s.Router.ServeHTTP(w, request)
 	response := w.Result()
 	_ = response.Body.Close()
 	assert.Equal(test.t, test.dec.responseExpected.StatusCode, response.StatusCode)
@@ -152,6 +155,7 @@ func getTests() []Test {
 }
 
 func TestHandleServiceEncode(t *testing.T) {
+	app.InitShortener()
 	for _, test := range getTests() {
 		t.Run(test.name, func(t *testing.T) {
 			test.test(t)

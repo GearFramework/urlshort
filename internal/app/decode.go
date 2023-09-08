@@ -1,6 +1,8 @@
 package app
 
-import "errors"
+import (
+	"errors"
+)
 
 func DecodeURL(shortURL string) (string, error) {
 	url, exists := urls[shortURL]
