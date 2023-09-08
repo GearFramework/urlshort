@@ -9,8 +9,8 @@ import (
 )
 
 func TestRoutes(t *testing.T) {
-	a := app.NewShortener(config.ParseFlags())
-	s := NewServer(&Config{Addr: a.Conf.Host}, a)
+	a := app.NewShortener(config.GetConfig())
+	s := NewServer(&Config{Addr: a.Conf.Addr}, a)
 	s.InitRoutes()
 	tests := map[string][]struct {
 		pathExpected string
