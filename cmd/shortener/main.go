@@ -15,7 +15,10 @@ func main() {
 
 func run() error {
 	shortener := app.NewShortener(config.GetConfig())
-	s := server.NewServer(&server.Config{Addr: shortener.Conf.Addr}, shortener)
+	s, err := server.NewServer(shortener.Conf, shortener)
+	if err != nil {
+		return err
+	}
 	s.InitRoutes()
 	return s.Up()
 }

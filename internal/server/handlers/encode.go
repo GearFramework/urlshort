@@ -2,9 +2,9 @@ package handlers
 
 import (
 	"github.com/GearFramework/urlshort/internal/pkg"
+	"github.com/GearFramework/urlshort/internal/pkg/logger"
 	"github.com/gin-gonic/gin"
 	"io"
-	"log"
 	"net/http"
 	neturl "net/url"
 )
@@ -18,16 +18,16 @@ func EncodeURL(api pkg.APIShortener, ctx *gin.Context) {
 	}
 	url := string(body)
 	if len(url) == 0 {
-		log.Printf("Error: empty url in request")
+		logger.Log.Errorln("empty url in request")
 		ctx.Status(http.StatusBadRequest)
 		return
 	}
 	if _, err = neturl.ParseRequestURI(url); err != nil {
-		log.Printf("Error: invalid url\n")
+		logger.Log.Errorln("invalid url")
 		ctx.Status(http.StatusBadRequest)
 		return
 	}
 	shortURL := api.EncodeURL(url)
-	log.Printf("Request url: %s short url: %s\n", url, shortURL)
+	logger.Log.Infof("Request url: %s short url: %s\n", url, shortURL)
 	ctx.Data(http.StatusCreated, "text/plain", []byte(shortURL))
 }
