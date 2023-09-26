@@ -1,25 +1,33 @@
 package server
 
 import (
-	"fmt"
+	"github.com/GearFramework/urlshort/internal/config"
 	"github.com/GearFramework/urlshort/internal/pkg"
+	"github.com/GearFramework/urlshort/internal/pkg/logger"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
 type Server struct {
-	Conf   *Config
+	Conf   *config.ServiceConfig
 	HTTP   *http.Server
 	Router *gin.Engine
 	api    pkg.APIShortener
 }
 
-func NewServer(c *Config, api pkg.APIShortener) *Server {
-	return &Server{
+func NewServer(c *config.ServiceConfig, api pkg.APIShortener) (*Server, error) {
+	if err := logger.Initialize(c.LoggerLevel); err != nil {
+		return nil, err
+	}
+	gin.SetMode(gin.ReleaseMode)
+	router := gin.New()
+	s := Server{
 		Conf:   c,
-		Router: gin.New(),
+		Router: router,
 		api:    api,
 	}
+	router.Use(s.logger)
+	return &s, nil
 }
 
 func (s *Server) Up() error {
@@ -27,10 +35,10 @@ func (s *Server) Up() error {
 		Addr:    s.Conf.Addr,
 		Handler: s.Router,
 	}
-	fmt.Printf("Start server at the %s\n", s.Conf.Addr)
-	err := s.HTTP.ListenAndServe()
+	logger.Log.Infof("Start server at the %s\n", s.Conf.Addr)
+	err := s.Router.Run(s.Conf.Addr)
 	if err != nil {
-		fmt.Printf("Failed to Listen and Serve: %v\n", err)
+		logger.Log.Infof("Failed to Listen and Serve: %v\n", err)
 		return err
 	}
 	return nil
