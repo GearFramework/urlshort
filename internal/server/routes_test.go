@@ -21,11 +21,13 @@ func TestRoutes(t *testing.T) {
 			{"/:id", false},
 			{"/", true},
 			{"/short/:code", false},
+			{"/api/shorten", true},
 		},
 		"GET": {
 			{"/:id", false},
 			{"/", false},
 			{"/:code", true},
+			{"/api/shorten", false},
 		},
 	}
 	routes := s.Router.Routes()
