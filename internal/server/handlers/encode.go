@@ -35,7 +35,7 @@ func EncodeURL(api pkg.APIShortener, ctx *gin.Context) {
 }
 
 type RequestJSON struct {
-	Url string `json:"url"`
+	URL string `json:"url"`
 }
 
 type ResponseJSON struct {
@@ -60,7 +60,7 @@ func EncodeURLFromJSON(api pkg.APIShortener, ctx *gin.Context) {
 		ctx.Status(http.StatusBadRequest)
 		return
 	}
-	resp := ResponseJSON{api.EncodeURL(req.Url)}
-	logger.Log.Infof("Request url: %s short url: %s\n", req.Url, resp.Result)
+	resp := ResponseJSON{api.EncodeURL(req.URL)}
+	logger.Log.Infof("Request url: %s short url: %s\n", req.URL, resp.Result)
 	ctx.JSON(http.StatusCreated, resp)
 }
