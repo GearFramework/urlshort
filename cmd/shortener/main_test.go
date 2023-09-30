@@ -207,6 +207,24 @@ func getTests() []Test {
 					assert.Regexp(t, "^http://localhost:8080/[a-zA-Z0-9]{8}$", req.Result)
 				},
 			},
+		}, {
+			name: "compress request encode",
+			enc: &TestEncode{
+				requestEncode: Req{
+					http.MethodPost,
+					"/api/shorten",
+					`{"url":"https://ya.ru"}`,
+					map[string]string{
+						"Content-Type":    "application/json",
+						"Accept-Encoding": "gzip",
+					},
+				},
+				responseExpected: RespExpected{StatusCode: http.StatusCreated},
+				testEnc: func(t *testing.T, test *TestEncode) {
+					assert.Contains(t, test.responseActual.r.Header.Get("Content-Type"), "application/json")
+					assert.Contains(t, test.responseActual.r.Header.Get("Content-Encoding"), "gzip")
+				},
+			},
 		},
 	}
 }

@@ -3,6 +3,7 @@ module github.com/GearFramework/urlshort
 go 1.20
 
 require (
+	github.com/gin-contrib/gzip v0.0.6
 	github.com/gin-gonic/gin v1.9.1
 	github.com/stretchr/testify v1.8.4
 	go.uber.org/zap v1.26.0

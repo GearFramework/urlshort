@@ -26,7 +26,8 @@ func NewServer(c *config.ServiceConfig, api pkg.APIShortener) (*Server, error) {
 		Router: router,
 		api:    api,
 	}
-	router.Use(s.logger)
+	router.Use(s.logger())
+	router.Use(s.compress())
 	return &s, nil
 }
 

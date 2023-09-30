@@ -5,6 +5,9 @@ import (
 	"github.com/GearFramework/urlshort/internal/config"
 	"github.com/GearFramework/urlshort/internal/server"
 	"log"
+	"os"
+	"os/signal"
+	"syscall"
 )
 
 func main() {
@@ -14,6 +17,7 @@ func main() {
 }
 
 func run() error {
+	gracefulStop()
 	shortener := app.NewShortener(config.GetConfig())
 	s, err := server.NewServer(shortener.Conf, shortener)
 	if err != nil {
@@ -21,4 +25,17 @@ func run() error {
 	}
 	s.InitRoutes()
 	return s.Up()
+}
+
+func gracefulStop() {
+	gracefulStopChan := make(chan os.Signal, 1)
+	signal.Notify(
+		gracefulStopChan,
+		syscall.SIGTERM,
+		syscall.SIGINT,
+	)
+	go func() {
+		_ = <-gracefulStopChan
+		os.Exit(0)
+	}()
 }
