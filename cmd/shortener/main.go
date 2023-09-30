@@ -35,7 +35,9 @@ func gracefulStop() {
 		syscall.SIGINT,
 	)
 	go func() {
-		_ = <-gracefulStopChan
+		sig := <-gracefulStopChan
+		log.Printf("Caught sig: %+v\n", sig)
+		log.Println("Application graceful stop!")
 		os.Exit(0)
 	}()
 }
