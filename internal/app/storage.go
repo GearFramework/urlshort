@@ -63,7 +63,6 @@ func (s *Storage) getURL(code string) (string, bool) {
 func (s *Storage) add(url, code string) {
 	s.codeByURL[url] = code
 	s.urlByCode[code] = url
-	logger.Log.Infof("Count urls in storage %d; counter to flush data %d", s.count(), s.flushCounter)
 	if s.count() == s.flushCounter {
 		if err := s.flush(); err != nil {
 			logger.Log.Warn(err.Error())
@@ -77,7 +76,6 @@ func (s *Storage) count() int {
 }
 
 func (s *Storage) flush() error {
-	logger.Log.Infoln("Flush storage to " + s.storageFilePath)
 	if s.codeByURL == nil {
 		return nil
 	}
@@ -90,14 +88,12 @@ func (s *Storage) flush() error {
 
 func (s *Storage) reset() {
 	s.clear()
-	logger.Log.Infoln("Reset storage")
 	if err := os.Remove(s.storageFilePath); err != nil {
 		log.Println(err.Error())
 	}
 }
 
 func (s *Storage) clear() {
-	logger.Log.Infoln("Clear storage")
 	for url, code := range s.codeByURL {
 		delete(s.codeByURL, url)
 		delete(s.urlByCode, code)
