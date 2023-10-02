@@ -15,10 +15,10 @@ const (
 func (app *ShortApp) EncodeURL(url string) string {
 	app.store.Lock()
 	defer app.store.Unlock()
-	code, exists := app.store.GetCode(url)
+	code, exists := app.store.getCode(url)
 	if !exists {
 		code = app.getRandomString(defShortLen)
-		app.store.Add(url, code)
+		app.store.add(url, code)
 	}
 	return fmt.Sprintf("%s/%s", app.Conf.ShortURLHost, code)
 }

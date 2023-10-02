@@ -4,12 +4,12 @@ import (
 	"errors"
 )
 
-func (app *ShortApp) DecodeURL(shortURL string) (string, error) {
+func (app *ShortApp) DecodeURL(code string) (string, error) {
 	app.store.Lock()
 	defer app.store.Unlock()
-	url, exists := app.store.GetCode(shortURL)
+	url, exists := app.store.getURL(code)
 	if !exists {
-		return "", errors.New("invalid short url")
+		return "", errors.New("invalid short url " + code)
 	}
 	return url, nil
 }

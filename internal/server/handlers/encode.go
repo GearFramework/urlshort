@@ -43,8 +43,7 @@ type ResponseJSON struct {
 }
 
 func EncodeURLFromJSON(api pkg.APIShortener, ctx *gin.Context) {
-	ct := strings.Split(ctx.Request.Header.Get("Content-Type"), ";")
-	if ct[0] != "application/json" {
+	if !strings.Contains(ctx.Request.Header.Get("Content-Type"), "application/json") {
 		logger.Log.Errorf(
 			"invalid request header: Content-Type %s\n",
 			ctx.Request.Header.Get("Content-Type"),

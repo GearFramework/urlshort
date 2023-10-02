@@ -34,6 +34,7 @@ func (c *compressHandler) Handle(ctx *gin.Context) {
 		c.DecompressHandle(ctx)
 	}
 	if !c.canCompress(ctx.Request) {
+		fmt.Println(ctx.Request.Header.Get("Accept-Encoding"))
 		return
 	}
 	gz := c.pool.Get().(*gzip.Writer)

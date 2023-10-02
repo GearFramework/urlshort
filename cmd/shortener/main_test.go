@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/GearFramework/urlshort/internal/app"
 	"github.com/GearFramework/urlshort/internal/config"
 	"github.com/GearFramework/urlshort/internal/pkg"
@@ -99,6 +100,7 @@ func (test *Test) testEncode(api pkg.APIShortener) {
 }
 
 func (test *Test) testDecode(api pkg.APIShortener) {
+	fmt.Println("Response url ", test.dec.requestDecode.Target)
 	request := httptest.NewRequest(test.dec.requestDecode.Method, test.dec.requestDecode.Target, nil)
 	w := httptest.NewRecorder()
 	s, err := server.NewServer(&config.ServiceConfig{Addr: "localhost:8080", LoggerLevel: "info"}, api)
@@ -231,6 +233,7 @@ func getTests() []Test {
 
 func TestHandleServiceEncode(t *testing.T) {
 	a, err := app.NewShortener(config.GetConfig())
+	a.ClearShortly(true)
 	assert.NoError(t, err)
 	for _, test := range getTests() {
 		t.Run(test.name, func(t *testing.T) {

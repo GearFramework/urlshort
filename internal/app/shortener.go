@@ -30,11 +30,18 @@ func (app *ShortApp) initApp() error {
 }
 
 func (app *ShortApp) AddShortly(url, code string) {
-	app.store.Add(url, code)
+	app.store.add(url, code)
+}
+
+func (app *ShortApp) ClearShortly(hard bool) {
+	app.store.clear()
+	if hard {
+		app.store.reset()
+	}
 }
 
 func (app *ShortApp) StopApp() {
-	if err := app.store.Flush(); err != nil {
+	if err := app.store.flush(); err != nil {
 		logger.Log.Warn(err.Error())
 	}
 }
