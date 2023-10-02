@@ -10,9 +10,13 @@ import (
 )
 
 func TestEncodeURL(t *testing.T) {
+	var err error
 	if shortener == nil {
-		shortener = NewShortener(config.GetConfig())
+		shortener, err = NewShortener(config.GetConfig())
+		assert.NoError(t, err)
 	}
+	shortener.ClearShortly(true)
+	assert.Equal(t, 0, shortener.store.count())
 	testURLs := []string{
 		"http://ya.ru",
 		"http://yandex.ru",
@@ -27,11 +31,16 @@ func TestEncodeURL(t *testing.T) {
 }
 
 func TestEncodeURLExists(t *testing.T) {
+	var err error
 	if shortener == nil {
-		shortener = NewShortener(config.GetConfig())
+		shortener, err = NewShortener(config.GetConfig())
+		assert.NoError(t, err)
 	}
+	shortener.ClearShortly(true)
+	assert.Equal(t, 0, shortener.store.count())
 	shortener.AddShortly("http://ya.ru", "dHGfdhj4")
 	shortener.AddShortly("http://yandex.ru", "78gsshSd")
+	assert.Equal(t, 2, shortener.store.count())
 	testURLs := []struct {
 		url  string
 		want string
