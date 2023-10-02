@@ -17,8 +17,11 @@ func main() {
 }
 
 func run() error {
-	gracefulStop()
-	shortener := app.NewShortener(config.GetConfig())
+	shortener, err := app.NewShortener(config.GetConfig())
+	if err != nil {
+		return err
+	}
+	gracefulStop(shortener.StopApp)
 	s, err := server.NewServer(shortener.Conf, shortener)
 	if err != nil {
 		return err
@@ -27,7 +30,7 @@ func run() error {
 	return s.Up()
 }
 
-func gracefulStop() {
+func gracefulStop(stopCallback func()) {
 	gracefulStopChan := make(chan os.Signal, 1)
 	signal.Notify(
 		gracefulStopChan,
@@ -36,6 +39,7 @@ func gracefulStop() {
 	)
 	go func() {
 		sig := <-gracefulStopChan
+		stopCallback()
 		log.Printf("Caught sig: %+v\n", sig)
 		log.Println("Application graceful stop!")
 		os.Exit(0)
