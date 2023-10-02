@@ -9,7 +9,8 @@ import (
 )
 
 func TestRoutes(t *testing.T) {
-	a := app.NewShortener(config.GetConfig())
+	a, err := app.NewShortener(config.GetConfig())
+	assert.NoError(t, err)
 	s, err := NewServer(a.Conf, a)
 	assert.NoError(t, err)
 	s.InitRoutes()

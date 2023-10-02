@@ -7,8 +7,10 @@ import (
 )
 
 func TestDecodeURL(t *testing.T) {
+	var err error
 	if shortener == nil {
-		shortener = NewShortener(config.GetConfig())
+		shortener, err = NewShortener(config.GetConfig())
+		assert.NoError(t, err)
 	}
 	shortener.AddShortly("http://ya.ru", "dHGfdhj4")
 	shortener.AddShortly("http://yandex.ru", "78gsshSd")
