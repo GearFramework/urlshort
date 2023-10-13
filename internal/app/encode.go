@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"github.com/GearFramework/urlshort/internal/pkg/logger"
 	"math/rand"
 	"time"
 )
@@ -18,7 +19,9 @@ func (app *ShortApp) EncodeURL(url string) string {
 	code, exists := app.Store.GetCode(url)
 	if !exists {
 		code = app.getRandomString(defShortLen)
-		app.Store.Add(url, code)
+		if err := app.Store.Insert(url, code); err != nil {
+			logger.Log.Error(err.Error())
+		}
 	}
 	return fmt.Sprintf("%s/%s", app.Conf.ShortURLHost, code)
 }

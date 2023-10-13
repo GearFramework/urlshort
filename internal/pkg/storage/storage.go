@@ -52,13 +52,7 @@ func (store *Store) Count() int {
 	return count
 }
 
-func (store *Store) Add(url, code string) {
-	if err := store.insert(url, code); err != nil {
-		logger.Log.Error(err.Error())
-	}
-}
-
-func (store *Store) insert(url, code string) error {
+func (store *Store) Insert(url, code string) error {
 	_, err := store.connection.DB.Exec(`
 		INSERT INTO urls.shortly (url, code) 
 		VALUES ($1, $2)
@@ -66,7 +60,7 @@ func (store *Store) insert(url, code string) error {
 	return err
 }
 
-func (store *Store) GetUrl(code string) (string, bool) {
+func (store *Store) GetURL(code string) (string, bool) {
 	var url string
 	err := store.connection.DB.Get(&url, `
 		SELECT url 

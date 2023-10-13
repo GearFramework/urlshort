@@ -30,7 +30,9 @@ func (app *ShortApp) initApp() error {
 }
 
 func (app *ShortApp) AddShortly(url, code string) {
-	app.Store.Add(url, code)
+	if err := app.Store.Insert(url, code); err != nil {
+		logger.Log.Error(err.Error())
+	}
 }
 
 func (app *ShortApp) ClearShortly() {
