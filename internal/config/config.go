@@ -9,7 +9,7 @@ const (
 	defaultShortURL    = "http://localhost:8080"
 	defaultLevel       = "info"
 	defaultStoragePath = "/tmp/short-url-db.json"
-	defaultDatabaseDSN = "postgres://pgadmin:159753@localhost:5432/urlshortly"
+	defaultDatabaseDSN = "postgres://pgadmin:159753@localhost:5432/urlshortl"
 )
 
 type ServiceConfig struct {
