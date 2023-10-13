@@ -233,7 +233,7 @@ func getTests() []Test {
 
 func TestHandleServiceEncode(t *testing.T) {
 	a, err := app.NewShortener(config.GetConfig())
-	a.ClearShortly()
+	a.ClearShortly(true)
 	assert.NoError(t, err)
 	for _, test := range getTests() {
 		t.Run(test.name, func(t *testing.T) {

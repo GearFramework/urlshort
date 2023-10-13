@@ -4,11 +4,13 @@ import (
 	"github.com/GearFramework/urlshort/internal/config"
 	"github.com/GearFramework/urlshort/internal/pkg/logger"
 	"github.com/GearFramework/urlshort/internal/pkg/storage"
+	"io"
 )
 
 type ShortApp struct {
 	Conf         *config.ServiceConfig
-	Store        *storage.Store
+	store        *Storage
+	DB           *storage.Store
 	flushCounter int
 }
 
@@ -19,28 +21,29 @@ func NewShortener(conf *config.ServiceConfig) (*ShortApp, error) {
 }
 
 func (app *ShortApp) initApp() error {
-	app.Store = storage.NewStorage(&storage.StorageConfig{
-		ConnectionDSN:   app.Conf.DatabaseDSN,
-		ConnectMaxOpens: 10,
-	})
-	if err := app.Store.InitStorage(); err != nil {
-		return err
+	app.store = NewStorage(app.Conf.StorageFilePath)
+	if err := app.store.loadShortlyURLs(); err != nil {
+		if err != io.EOF {
+			return err
+		}
+		app.store.initStorage()
 	}
 	return nil
 }
 
 func (app *ShortApp) AddShortly(url, code string) {
-	if err := app.Store.Insert(url, code); err != nil {
-		logger.Log.Error(err.Error())
-	}
+	app.store.add(url, code)
 }
 
-func (app *ShortApp) ClearShortly() {
-	if err := app.Store.Truncate(); err != nil {
-		logger.Log.Error(err.Error())
+func (app *ShortApp) ClearShortly(hard bool) {
+	app.store.clear()
+	if hard {
+		app.store.reset()
 	}
 }
 
 func (app *ShortApp) StopApp() {
-	app.Store.Close()
+	if err := app.store.flush(); err != nil {
+		logger.Log.Warn(err.Error())
+	}
 }

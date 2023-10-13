@@ -8,7 +8,7 @@ import (
 )
 
 func Ping(api pkg.APIShortener, ctx *gin.Context) {
-	if err := api.(*app.ShortApp).Store.Ping(); err != nil {
+	if err := api.(*app.ShortApp).DB.Ping(); err != nil {
 		ctx.Status(http.StatusInternalServerError)
 		return
 	}

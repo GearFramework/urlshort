@@ -3,6 +3,7 @@ package app
 import (
 	"github.com/GearFramework/urlshort/internal/config"
 	"github.com/stretchr/testify/assert"
+	"log"
 	"testing"
 )
 
@@ -12,11 +13,11 @@ func TestDecodeURL(t *testing.T) {
 		shortener, err = NewShortener(config.GetConfig())
 		assert.NoError(t, err)
 	}
-	shortener.ClearShortly()
-	assert.Equal(t, 0, shortener.Store.Count())
+	shortener.ClearShortly(true)
+	assert.Equal(t, 0, shortener.store.count())
 	shortener.AddShortly("http://ya.ru", "dHGfdhj4")
 	shortener.AddShortly("http://yandex.ru", "78gsshSd")
-	assert.Equal(t, 2, shortener.Store.Count())
+	assert.Equal(t, 2, shortener.store.count())
 	testCodes := []struct {
 		code  string
 		want  string
@@ -29,6 +30,7 @@ func TestDecodeURL(t *testing.T) {
 	}
 	for _, test := range testCodes {
 		url, err := shortener.DecodeURL(test.code)
+		log.Println(shortener.store.codeByURL, " DECODE URL ", test.code, " ", url)
 		if test.error {
 			t.Run("has error", func(t *testing.T) {
 				assert.Error(t, err)

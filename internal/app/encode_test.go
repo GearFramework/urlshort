@@ -15,8 +15,8 @@ func TestEncodeURL(t *testing.T) {
 		shortener, err = NewShortener(config.GetConfig())
 		assert.NoError(t, err)
 	}
-	shortener.ClearShortly()
-	assert.Equal(t, 0, shortener.Store.Count())
+	shortener.ClearShortly(true)
+	assert.Equal(t, 0, shortener.store.count())
 	testURLs := []string{
 		"http://ya.ru",
 		"http://yandex.ru",
@@ -36,11 +36,11 @@ func TestEncodeURLExists(t *testing.T) {
 		shortener, err = NewShortener(config.GetConfig())
 		assert.NoError(t, err)
 	}
-	shortener.ClearShortly()
-	assert.Equal(t, 0, shortener.Store.Count())
+	shortener.ClearShortly(true)
+	assert.Equal(t, 0, shortener.store.count())
 	shortener.AddShortly("http://ya.ru", "dHGfdhj4")
 	shortener.AddShortly("http://yandex.ru", "78gsshSd")
-	assert.Equal(t, 2, shortener.Store.Count())
+	assert.Equal(t, 2, shortener.store.count())
 	testURLs := []struct {
 		url  string
 		want string
