@@ -28,6 +28,8 @@ func (app *ShortApp) initApp() error {
 		}
 		app.store.initStorage()
 	}
+	app.DB = storage.NewStorage(&storage.StorageConfig{ConnectionDSN: app.Conf.DatabaseDSN, ConnectMaxOpens: 10})
+	app.DB.InitStorage()
 	return nil
 }
 

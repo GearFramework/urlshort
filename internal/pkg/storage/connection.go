@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"fmt"
 	"github.com/GearFramework/urlshort/internal/pkg/logger"
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/stdlib"
@@ -31,18 +32,19 @@ func (conn *StorageConnection) Open() error {
 	if conn.pgxConfig, err = conn.getPgxConfig(); err != nil {
 		return err
 	}
-	return conn.openSqlxViaPooler()
+	conn.openSqlxViaPooler()
+	return nil
 }
 
 // openSqlxViaPooler открытие пула соединений
-func (conn *StorageConnection) openSqlxViaPooler() error {
+func (conn *StorageConnection) openSqlxViaPooler() {
 	db := stdlib.OpenDB(*conn.pgxConfig)
 	conn.DB = sqlx.NewDb(db, "pgx")
 	conn.DB.SetMaxOpenConns(conn.config.ConnectMaxOpens)
-	return conn.Ping()
 }
 
 func (conn *StorageConnection) getPgxConfig() (*pgx.ConnConfig, error) {
+	fmt.Println(conn.config.ConnectionDSN)
 	pgxConfig, err := pgx.ParseConfig(conn.config.ConnectionDSN)
 	if err != nil {
 		log.Printf("Unable to parse DSN: %v\n", err)
