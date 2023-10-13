@@ -13,12 +13,12 @@ const (
 )
 
 func (app *ShortApp) EncodeURL(url string) string {
-	app.store.Lock()
-	defer app.store.Unlock()
-	code, exists := app.store.getCode(url)
+	app.Store.Lock()
+	defer app.Store.Unlock()
+	code, exists := app.Store.GetCode(url)
 	if !exists {
 		code = app.getRandomString(defShortLen)
-		app.store.add(url, code)
+		app.Store.Add(url, code)
 	}
 	return fmt.Sprintf("%s/%s", app.Conf.ShortURLHost, code)
 }

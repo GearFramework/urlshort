@@ -5,9 +5,9 @@ import (
 )
 
 func (app *ShortApp) DecodeURL(code string) (string, error) {
-	app.store.Lock()
-	defer app.store.Unlock()
-	url, exists := app.store.getURL(code)
+	app.Store.Lock()
+	defer app.Store.Unlock()
+	url, exists := app.Store.GetUrl(code)
 	if !exists {
 		return "", errors.New("invalid short url " + code)
 	}

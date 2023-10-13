@@ -9,6 +9,7 @@ const (
 	defaultShortURL    = "http://localhost:8080"
 	defaultLevel       = "info"
 	defaultStoragePath = "/tmp/short-url-db.json"
+	defaultDatabaseDSN = "postgres://pgadmin:159753@localhost:5432/urlshortly"
 )
 
 type ServiceConfig struct {
@@ -16,10 +17,11 @@ type ServiceConfig struct {
 	ShortURLHost    string
 	LoggerLevel     string
 	StorageFilePath string
+	DatabaseDSN     string
 }
 
 func GetConfig() *ServiceConfig {
-	conf := ParseFlags(defaultAddress, defaultShortURL, defaultLevel, defaultStoragePath)
+	conf := ParseFlags()
 	if envAddr := os.Getenv("SERVER_ADDRESS"); envAddr != "" {
 		conf.Addr = envAddr
 	}
@@ -31,6 +33,9 @@ func GetConfig() *ServiceConfig {
 	}
 	if envStoragePath := os.Getenv("FILE_STORAGE_PATH"); envStoragePath != "" {
 		conf.StorageFilePath = envStoragePath
+	}
+	if envDatabaseDSN := os.Getenv("DATABASE_DSN"); envDatabaseDSN != "" {
+		conf.DatabaseDSN = envDatabaseDSN
 	}
 	return conf
 }
