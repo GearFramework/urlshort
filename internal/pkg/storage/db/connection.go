@@ -1,6 +1,7 @@
-package storage
+package db
 
 import (
+	"context"
 	"github.com/GearFramework/urlshort/internal/pkg/logger"
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/stdlib"
@@ -52,12 +53,14 @@ func (conn *StorageConnection) getPgxConfig() (*pgx.ConnConfig, error) {
 }
 
 func (conn *StorageConnection) Ping() error {
-	return conn.DB.Ping()
+	return conn.DB.PingContext(context.Background())
 }
 
 func (conn *StorageConnection) Close() {
 	if conn.Ping() == nil {
 		logger.Log.Info("Close storage connection")
-		conn.DB.Close()
+		if err := conn.DB.Close(); err != nil {
+			logger.Log.Error(err.Error())
+		}
 	}
 }

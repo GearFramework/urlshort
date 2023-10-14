@@ -5,11 +5,13 @@ import (
 )
 
 const (
-	defaultAddress     = ":8080"
-	defaultShortURL    = "http://localhost:8080"
-	defaultLevel       = "info"
-	defaultStoragePath = "/tmp/short-url-db.json"
-	defaultDatabaseDSN = "postgres://pgadmin:159753@localhost:5432/urlshortly"
+	defaultAddress  = ":8080"
+	defaultShortURL = "http://localhost:8080"
+	defaultLevel    = "info"
+	//defaultStoragePath = "/tmp/short-url-db.json"
+	defaultStoragePath = ""
+	//defaultDatabaseDSN = "postgres://pgadmin:159753@localhost:5432/urlshortly"
+	defaultDatabaseDSN = ""
 )
 
 type ServiceConfig struct {

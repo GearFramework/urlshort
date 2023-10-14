@@ -8,8 +8,13 @@ import (
 	"testing"
 )
 
+var a *app.ShortApp
+
 func TestRoutes(t *testing.T) {
-	a, err := app.NewShortener(config.GetConfig())
+	var err error
+	if a == nil {
+		a, err = app.NewShortener(config.GetConfig())
+	}
 	assert.NoError(t, err)
 	s, err := NewServer(a.Conf, a)
 	assert.NoError(t, err)
