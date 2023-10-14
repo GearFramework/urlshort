@@ -3,6 +3,7 @@ package file
 import (
 	"encoding/json"
 	"github.com/GearFramework/urlshort/internal/pkg/logger"
+	"log"
 	"os"
 	"sync"
 )
@@ -30,7 +31,7 @@ func (s *Storage) InitStorage() error {
 	s.flushCounter = s.Config.FlushPerItems
 	err := s.loadShortlyURLs()
 	if err != nil {
-		logger.Log.Error(err.Error())
+		log.Println(err.Error())
 	}
 	return err
 }
