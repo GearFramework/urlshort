@@ -2,28 +2,50 @@ package app
 
 import (
 	"github.com/GearFramework/urlshort/internal/config"
+	"github.com/GearFramework/urlshort/internal/pkg/logger"
+	"github.com/GearFramework/urlshort/internal/pkg/storage"
+	"io"
 )
 
-type mapCodes map[string]string
-type mapURLs map[string]string
-
 type ShortApp struct {
-	Conf  *config.ServiceConfig
-	codes mapCodes
-	urls  mapURLs
+	Conf         *config.ServiceConfig
+	store        *Storage
+	DB           *storage.Store
+	flushCounter int
 }
 
-func NewShortener(conf *config.ServiceConfig) *ShortApp {
+func NewShortener(conf *config.ServiceConfig) (*ShortApp, error) {
 	shortener := ShortApp{Conf: conf}
-	shortener.initApp()
-	return &shortener
+	err := shortener.initApp()
+	return &shortener, err
 }
 
-func (app *ShortApp) initApp() {
-	app.codes = make(mapCodes, 10)
-	app.urls = make(mapURLs, 10)
+func (app *ShortApp) initApp() error {
+	app.store = NewStorage(app.Conf.StorageFilePath)
+	if err := app.store.loadShortlyURLs(); err != nil {
+		if err != io.EOF {
+			return err
+		}
+		app.store.initStorage()
+	}
+	app.DB = storage.NewStorage(&storage.StorageConfig{ConnectionDSN: app.Conf.DatabaseDSN, ConnectMaxOpens: 10})
+	app.DB.InitStorage()
+	return nil
 }
+
 func (app *ShortApp) AddShortly(url, code string) {
-	app.codes[url] = code
-	app.urls[code] = url
+	app.store.add(url, code)
+}
+
+func (app *ShortApp) ClearShortly(hard bool) {
+	app.store.clear()
+	if hard {
+		app.store.reset()
+	}
+}
+
+func (app *ShortApp) StopApp() {
+	if err := app.store.flush(); err != nil {
+		logger.Log.Warn(err.Error())
+	}
 }
