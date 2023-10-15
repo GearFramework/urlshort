@@ -31,16 +31,29 @@ func (app *ShortApp) initApp() error {
 
 func (app *ShortApp) factoryStorage() pkg.Storable {
 	if app.Conf.DatabaseDSN != "" {
-		return db.NewStorage(&db.StorageConfig{
+		store := db.NewStorage(&db.StorageConfig{
 			ConnectionDSN:   app.Conf.DatabaseDSN,
 			ConnectMaxOpens: 10,
 		})
+		if err := app.isValidStorage(store); err == nil {
+			return store
+		}
 	} else if app.Conf.StorageFilePath != "" {
-		return file.NewStorage(&file.StorageConfig{
+		store := file.NewStorage(&file.StorageConfig{
 			StorageFilePath: app.Conf.StorageFilePath,
 		})
+		if err := app.isValidStorage(store); err == nil {
+			return store
+		}
 	}
 	return mem.NewStorage()
+}
+
+func (app *ShortApp) isValidStorage(store pkg.Storable) error {
+	if err := store.InitStorage(); err != nil {
+		return err
+	}
+	return store.Ping()
 }
 
 func (app *ShortApp) AddShortly(url, code string) {
