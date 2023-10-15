@@ -21,14 +21,9 @@ func (s *Storage) InitStorage() error {
 	if err := s.connection.Open(); err != nil {
 		return err
 	}
-	if err := s.Ping(); err != nil {
-		return err
-	}
-	return s.createStorage()
-}
-
-func (s *Storage) createStorage() error {
-	_, err := s.connection.DB.ExecContext(context.Background(), "CREATE SCHEMA IF NOT EXISTS urls")
+	_, err := s.connection.DB.ExecContext(context.Background(), `
+		CREATE SCHEMA IF NOT EXISTS urls
+	`)
 	if err != nil {
 		return err
 	}

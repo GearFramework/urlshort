@@ -3,6 +3,7 @@ package file
 import (
 	"encoding/json"
 	"github.com/GearFramework/urlshort/internal/pkg/logger"
+	"io"
 	"log"
 	"os"
 	"sync"
@@ -108,10 +109,10 @@ func (s *Storage) Ping() error {
 	_, err := os.Stat(s.Config.StorageFilePath)
 	if os.IsNotExist(err) {
 		fd, err := os.OpenFile(s.Config.StorageFilePath, os.O_RDONLY|os.O_CREATE, 0666)
-		if err != nil {
+		if err != nil && err != io.EOF {
 			return err
 		}
-		defer fd.Close()
+		return fd.Close()
 	}
 	return nil
 }
