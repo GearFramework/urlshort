@@ -40,7 +40,7 @@ func (conn *StorageConnection) openSqlxViaPooler() error {
 	db := stdlib.OpenDB(*conn.pgxConfig)
 	conn.DB = sqlx.NewDb(db, "pgx")
 	conn.DB.SetMaxOpenConns(conn.config.ConnectMaxOpens)
-	return conn.Ping()
+	return nil
 }
 
 func (conn *StorageConnection) getPgxConfig() (*pgx.ConnConfig, error) {

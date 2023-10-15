@@ -18,7 +18,28 @@ func NewStorage(config *StorageConfig) *Storage {
 }
 
 func (s *Storage) InitStorage() error {
-	return s.connection.Open()
+	if err := s.connection.Open(); err != nil {
+		return err
+	}
+	if err := s.Ping(); err != nil {
+		return err
+	}
+	return s.createStorage()
+}
+
+func (s *Storage) createStorage() error {
+	_, err := s.connection.DB.ExecContext(context.Background(), "CREATE SCHEMA IF NOT EXISTS urls")
+	if err != nil {
+		return err
+	}
+	_, err = s.connection.DB.ExecContext(context.Background(), `
+		CREATE TABLE IF NOT EXISTS urls.shortly (
+		    code VARCHAR(8),
+			url VARCHAR(1024),
+		    CONSTRAINT code_url PRIMARY KEY (code, url)
+		)
+	`)
+	return err
 }
 
 func (s *Storage) Close() {
