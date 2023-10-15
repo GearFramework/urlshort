@@ -24,11 +24,12 @@ func NewShortener(conf *config.ServiceConfig) (*ShortApp, error) {
 }
 
 func (app *ShortApp) initApp() error {
-	app.Store = app.factoryStorage()
-	return nil
+	var err error
+	app.Store, err = app.factoryStorage()
+	return err
 }
 
-func (app *ShortApp) factoryStorage() pkg.Storable {
+func (app *ShortApp) factoryStorage() (pkg.Storable, error) {
 	if app.Conf.DatabaseDSN != "" {
 		store := db.NewStorage(&db.StorageConfig{
 			ConnectionDSN:   app.Conf.DatabaseDSN,
@@ -36,7 +37,7 @@ func (app *ShortApp) factoryStorage() pkg.Storable {
 		})
 		if err := app.isValidStorage(store); err == nil {
 			log.Println("Use database urls storage")
-			return store
+			return store, nil
 		}
 	} else if app.Conf.StorageFilePath != "" {
 		store := file.NewStorage(&file.StorageConfig{
@@ -45,11 +46,15 @@ func (app *ShortApp) factoryStorage() pkg.Storable {
 		err := app.isValidStorage(store)
 		if err == nil || err == io.EOF {
 			log.Println("Use file urls storage")
-			return store
+			return store, nil
 		}
 	}
 	log.Println("Use in memory urls storage")
-	return mem.NewStorage()
+	store := mem.NewStorage()
+	if err := store.InitStorage(); err != nil {
+		return nil, err
+	}
+	return store, nil
 }
 
 func (app *ShortApp) isValidStorage(store pkg.Storable) error {
