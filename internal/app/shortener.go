@@ -1,6 +1,7 @@
 package app
 
 import (
+	"errors"
 	"github.com/GearFramework/urlshort/internal/config"
 	"github.com/GearFramework/urlshort/internal/pkg"
 	"github.com/GearFramework/urlshort/internal/pkg/logger"
@@ -9,6 +10,8 @@ import (
 	"github.com/GearFramework/urlshort/internal/pkg/storage/mem"
 	"io"
 	"log"
+	"math/rand"
+	"time"
 )
 
 type ShortApp struct {
@@ -44,7 +47,7 @@ func (app *ShortApp) factoryStorage() (pkg.Storable, error) {
 			StorageFilePath: app.Conf.StorageFilePath,
 		})
 		err := app.isValidStorage(store)
-		if err == nil || err == io.EOF {
+		if err == nil || errors.Is(err, io.EOF) {
 			log.Println("Use file urls storage")
 			return store, nil
 		}
@@ -74,6 +77,15 @@ func (app *ShortApp) ClearShortly() {
 	if err := app.Store.Truncate(); err != nil {
 		logger.Log.Error(err.Error())
 	}
+}
+
+func (app *ShortApp) getRandomString(length int) string {
+	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
+	b := make([]byte, length)
+	for i := 0; i < length; i++ {
+		b[i] = alphabet[rnd.Intn(lenAlpha)]
+	}
+	return string(b)
 }
 
 func (app *ShortApp) StopApp() {

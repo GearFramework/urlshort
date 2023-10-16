@@ -15,7 +15,7 @@ type ResultBatchShort struct {
 }
 
 type APIShortener interface {
-	EncodeURL(url string) string
+	EncodeURL(url string) (string, bool)
 	BatchEncodeURL(batch []BatchURLs) []ResultBatchShort
 	DecodeURL(shortURL string) (string, error)
 	AddShortly(url, code string)

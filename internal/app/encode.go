@@ -4,9 +4,7 @@ import (
 	"fmt"
 	"github.com/GearFramework/urlshort/internal/pkg"
 	"github.com/GearFramework/urlshort/internal/pkg/logger"
-	"math/rand"
 	"runtime"
-	"time"
 )
 
 const (
@@ -15,7 +13,7 @@ const (
 	defShortLen = 8
 )
 
-func (app *ShortApp) EncodeURL(url string) string {
+func (app *ShortApp) EncodeURL(url string) (string, bool) {
 	app.Store.Lock()
 	defer app.Store.Unlock()
 	code, exists := app.Store.GetCode(url)
@@ -25,16 +23,7 @@ func (app *ShortApp) EncodeURL(url string) string {
 			logger.Log.Error(err.Error())
 		}
 	}
-	return fmt.Sprintf("%s/%s", app.Conf.ShortURLHost, code)
-}
-
-func (app *ShortApp) getRandomString(length int) string {
-	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
-	b := make([]byte, length)
-	for i := 0; i < length; i++ {
-		b[i] = alphabet[rnd.Intn(lenAlpha)]
-	}
-	return string(b)
+	return fmt.Sprintf("%s/%s", app.Conf.ShortURLHost, code), exists
 }
 
 func (app *ShortApp) BatchEncodeURL(batch []pkg.BatchURLs) []pkg.ResultBatchShort {

@@ -196,7 +196,7 @@ func getTests() []Test {
 					`{"url":"https://ya.ru"}`,
 					map[string]string{"Content-Type": "application/json"},
 				},
-				responseExpected: RespExpected{StatusCode: http.StatusCreated},
+				responseExpected: RespExpected{StatusCode: http.StatusConflict},
 				testEnc: func(t *testing.T, test *TestEncode) {
 					assert.Contains(t, test.responseActual.r.Header.Get("Content-Type"), "application/json")
 					assert.NotEmpty(t, test.responseActual.ResponseURL)
@@ -221,7 +221,7 @@ func getTests() []Test {
 						"Accept-Encoding": "gzip",
 					},
 				},
-				responseExpected: RespExpected{StatusCode: http.StatusCreated},
+				responseExpected: RespExpected{StatusCode: http.StatusConflict},
 				testEnc: func(t *testing.T, test *TestEncode) {
 					assert.Contains(t, test.responseActual.r.Header.Get("Content-Type"), "application/json")
 					assert.Contains(t, test.responseActual.r.Header.Get("Content-Encoding"), "gzip")

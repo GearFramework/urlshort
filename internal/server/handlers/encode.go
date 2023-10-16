@@ -29,9 +29,13 @@ func EncodeURL(api pkg.APIShortener, ctx *gin.Context) {
 		ctx.Status(http.StatusBadRequest)
 		return
 	}
-	shortURL := api.EncodeURL(url)
+	shortURL, conflict := api.EncodeURL(url)
+	status := http.StatusCreated
 	logger.Log.Infof("Request url: %s short url: %s\n", url, shortURL)
-	ctx.Data(http.StatusCreated, "text/plain", []byte(shortURL))
+	if conflict {
+		status = http.StatusConflict
+	}
+	ctx.Data(status, "text/plain", []byte(shortURL))
 }
 
 type RequestJSON struct {
@@ -63,9 +67,14 @@ func EncodeURLFromJSON(api pkg.APIShortener, ctx *gin.Context) {
 		ctx.Status(http.StatusBadRequest)
 		return
 	}
-	resp := ResponseJSON{api.EncodeURL(req.URL)}
+	res, conflict := api.EncodeURL(req.URL)
+	resp := ResponseJSON{res}
+	status := http.StatusCreated
 	logger.Log.Infof("Request url: %s short url: %s\n", req.URL, resp.Result)
-	ctx.JSON(http.StatusCreated, resp)
+	if conflict {
+		status = http.StatusConflict
+	}
+	ctx.JSON(status, resp)
 }
 
 func BatchEncodeURLs(api pkg.APIShortener, ctx *gin.Context) {

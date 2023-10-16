@@ -22,7 +22,7 @@ func TestEncodeURL(t *testing.T) {
 		"http://yandex.ru",
 	}
 	for _, testURI := range testURLs {
-		shortURI := shortener.EncodeURL(testURI)
+		shortURI, _ := shortener.EncodeURL(testURI)
 		assert.NotEmpty(t, shortURI)
 		parsedURI, _ := url.ParseRequestURI(shortURI)
 		assert.Equal(t, defShortLen, len(strings.TrimLeft(parsedURI.Path, "/")))
@@ -49,7 +49,7 @@ func TestEncodeURLExists(t *testing.T) {
 		{"http://yandex.ru", shortener.Conf.ShortURLHost + "/78gsshSd"},
 	}
 	for _, test := range testURLs {
-		shortURL := shortener.EncodeURL(test.url)
+		shortURL, _ := shortener.EncodeURL(test.url)
 		assert.Equal(t, test.want, shortURL)
 	}
 }
