@@ -2,7 +2,9 @@ package db
 
 import (
 	"context"
+	"database/sql"
 	"github.com/GearFramework/urlshort/internal/pkg/logger"
+	"github.com/jmoiron/sqlx"
 	"sync"
 )
 
@@ -51,6 +53,30 @@ func (s *Storage) GetCode(url string) (string, bool) {
 	return code, err == nil
 }
 
+func (s *Storage) GetCodeBatch(batch []string) map[string]string {
+	codes := map[string]string{}
+	q, args, err := sqlx.In(`
+		SELECT code, url 
+		  FROM urls.shortly 
+		 WHERE url IN (?)
+ 	`, batch)
+	q = sqlx.Rebind(sqlx.DOLLAR, q)
+	rows, err := s.connection.DB.QueryContext(context.Background(), q, args...)
+	if err != nil {
+		logger.Log.Error(err.Error())
+		return codes
+	}
+	for rows.Next() {
+		var code, url string
+		err := rows.Scan(&code, &url)
+		if err != nil {
+			break
+		}
+		codes[url] = code
+	}
+	return codes
+}
+
 func (s *Storage) GetURL(code string) (string, bool) {
 	var url string
 	err := s.connection.DB.GetContext(context.Background(), &url, `
@@ -67,6 +93,32 @@ func (s *Storage) Insert(url, code string) error {
 		VALUES ($1, $2)
 	`, url, code)
 	return err
+}
+
+func (s *Storage) InsertBatch(batch [][]string) error {
+	ctx := context.Background()
+	var err error
+	tx, err := s.connection.DB.BeginTx(ctx, &sql.TxOptions{})
+	if err != nil {
+		return err
+	}
+	stmt, err := tx.PrepareContext(ctx, `
+		INSERT INTO urls.shortly (url, code) 
+		VALUES ($1, $2)
+	`)
+	if err != nil {
+		return err
+	}
+	for _, data := range batch {
+		_, err = stmt.ExecContext(ctx, data[0], data[1])
+		if err != nil {
+			if err := tx.Rollback(); err != nil {
+				logger.Log.Error(err.Error())
+			}
+			return err
+		}
+	}
+	return tx.Commit()
 }
 
 func (s *Storage) Count() int {
