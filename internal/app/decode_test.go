@@ -7,12 +7,16 @@ import (
 )
 
 func TestDecodeURL(t *testing.T) {
+	var err error
 	if shortener == nil {
-		shortener = NewShortener(config.GetConfig())
+		shortener, err = NewShortener(config.GetConfig())
+		assert.NoError(t, err)
 	}
+	shortener.ClearShortly()
+	assert.Equal(t, 0, shortener.Store.Count())
 	shortener.AddShortly("http://ya.ru", "dHGfdhj4")
 	shortener.AddShortly("http://yandex.ru", "78gsshSd")
-
+	assert.Equal(t, 2, shortener.Store.Count())
 	testCodes := []struct {
 		code  string
 		want  string
@@ -30,7 +34,7 @@ func TestDecodeURL(t *testing.T) {
 				assert.Error(t, err)
 			})
 		} else {
-			t.Run("has error", func(t *testing.T) {
+			t.Run("has no error", func(t *testing.T) {
 				assert.NoError(t, err)
 				assert.Equal(t, test.want, url)
 			})
