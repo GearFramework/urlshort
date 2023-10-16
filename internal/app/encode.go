@@ -44,9 +44,9 @@ func (app *ShortApp) BatchEncodeURL(batch []pkg.BatchURLs) []pkg.ResultBatchShor
 	trc, urls := transformBatchByCorrelation(batch)
 	for _, chunkURLs := range chunkingURLs(urls) {
 		existCodes := app.Store.GetCodeBatch(chunkURLs)
-		for existUrl, existCode := range existCodes {
+		for existURL, existCode := range existCodes {
 			res = append(res, pkg.ResultBatchShort{
-				CorrelationId: trc[existUrl],
+				CorrelationID: trc[existURL],
 				ShortURL:      fmt.Sprintf("%s/%s", app.Conf.ShortURLHost, existCode),
 			})
 		}
@@ -54,12 +54,12 @@ func (app *ShortApp) BatchEncodeURL(batch []pkg.BatchURLs) []pkg.ResultBatchShor
 			continue
 		}
 		notExistCodes := getNotExists(chunkURLs, existCodes)
-		newShortUrls, pack := app.prepareNotExistsShortURLs(trc, notExistCodes)
+		newShortURLs, pack := app.prepareNotExistsShortURLs(trc, notExistCodes)
 		if err := app.Store.InsertBatch(pack); err != nil {
 			logger.Log.Error(err.Error())
 			continue
 		}
-		res = append(res, newShortUrls...)
+		res = append(res, newShortURLs...)
 	}
 	return res
 }
@@ -73,7 +73,7 @@ func (app *ShortApp) prepareNotExistsShortURLs(
 	for _, url := range notExistCodes {
 		code := app.getRandomString(defShortLen)
 		res = append(res, pkg.ResultBatchShort{
-			CorrelationId: trc[url],
+			CorrelationID: trc[url],
 			ShortURL:      fmt.Sprintf("%s/%s", app.Conf.ShortURLHost, code),
 		})
 		pack = append(pack, []string{url, code})
@@ -85,7 +85,7 @@ func transformBatchByCorrelation(batch []pkg.BatchURLs) (map[string]string, []st
 	trc := map[string]string{}
 	urls := []string{}
 	for _, packet := range batch {
-		trc[packet.OriginalURL] = packet.CorrelationId
+		trc[packet.OriginalURL] = packet.CorrelationID
 		urls = append(urls, packet.OriginalURL)
 	}
 	return trc, urls

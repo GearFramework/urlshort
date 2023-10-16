@@ -60,12 +60,17 @@ func (s *Storage) GetCodeBatch(batch []string) map[string]string {
 		  FROM urls.shortly 
 		 WHERE url IN (?)
  	`, batch)
+	if err != nil {
+		logger.Log.Error(err.Error())
+		return codes
+	}
 	q = sqlx.Rebind(sqlx.DOLLAR, q)
 	rows, err := s.connection.DB.QueryContext(context.Background(), q, args...)
 	if err != nil {
 		logger.Log.Error(err.Error())
 		return codes
 	}
+	defer rows.Close()
 	for rows.Next() {
 		var code, url string
 		err := rows.Scan(&code, &url)
@@ -73,6 +78,9 @@ func (s *Storage) GetCodeBatch(batch []string) map[string]string {
 			break
 		}
 		codes[url] = code
+	}
+	if err = rows.Err(); err != nil {
+		logger.Log.Warn(err.Error())
 	}
 	return codes
 }
