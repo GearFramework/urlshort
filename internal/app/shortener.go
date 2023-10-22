@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"errors"
 	"github.com/GearFramework/urlshort/internal/config"
 	"github.com/GearFramework/urlshort/internal/pkg"
@@ -67,8 +68,8 @@ func (app *ShortApp) isValidStorage(store pkg.Storable) error {
 	return store.Ping()
 }
 
-func (app *ShortApp) AddShortly(url, code string) {
-	if err := app.Store.Insert(url, code); err != nil {
+func (app *ShortApp) AddShortly(ctx context.Context, url, code string) {
+	if err := app.Store.Insert(ctx, url, code); err != nil {
 		logger.Log.Error(err.Error())
 	}
 }

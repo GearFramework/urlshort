@@ -1,6 +1,7 @@
 package file
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"github.com/GearFramework/urlshort/internal/pkg/logger"
@@ -58,12 +59,12 @@ func (s *Storage) Close() {
 	}
 }
 
-func (s *Storage) GetCode(url string) (string, bool) {
+func (s *Storage) GetCode(ctx context.Context, url string) (string, bool) {
 	code, ok := s.codeByURL[url]
 	return code, ok
 }
 
-func (s *Storage) GetCodeBatch(batch []string) map[string]string {
+func (s *Storage) GetCodeBatch(ctx context.Context, batch []string) map[string]string {
 	codes := map[string]string{}
 	for _, url := range batch {
 		if _, ok := s.codeByURL[url]; ok {
@@ -73,12 +74,12 @@ func (s *Storage) GetCodeBatch(batch []string) map[string]string {
 	return codes
 }
 
-func (s *Storage) GetURL(code string) (string, bool) {
+func (s *Storage) GetURL(ctx context.Context, code string) (string, bool) {
 	url, ok := s.urlByCode[code]
 	return url, ok
 }
 
-func (s *Storage) Insert(url, code string) error {
+func (s *Storage) Insert(ctx context.Context, url, code string) error {
 	s.codeByURL[url] = code
 	s.urlByCode[code] = url
 	var err error
@@ -89,7 +90,7 @@ func (s *Storage) Insert(url, code string) error {
 	return err
 }
 
-func (s *Storage) InsertBatch(batch [][]string) error {
+func (s *Storage) InsertBatch(ctx context.Context, batch [][]string) error {
 	for _, pack := range batch {
 		s.codeByURL[pack[0]] = pack[1]
 		s.urlByCode[pack[1]] = pack[0]

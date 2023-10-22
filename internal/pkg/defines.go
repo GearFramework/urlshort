@@ -1,6 +1,7 @@
 package pkg
 
 import (
+	"context"
 	"sync"
 )
 
@@ -15,20 +16,20 @@ type ResultBatchShort struct {
 }
 
 type APIShortener interface {
-	EncodeURL(url string) (string, bool)
-	BatchEncodeURL(batch []BatchURLs) []ResultBatchShort
-	DecodeURL(shortURL string) (string, error)
-	AddShortly(url, code string)
+	EncodeURL(ctx context.Context, url string) (string, bool)
+	BatchEncodeURL(ctx context.Context, batch []BatchURLs) []ResultBatchShort
+	DecodeURL(ctx context.Context, shortURL string) (string, error)
+	AddShortly(ctx context.Context, url, code string)
 }
 
 type Storable interface {
 	sync.Locker
 	InitStorage() error
-	GetCode(url string) (string, bool)
-	GetCodeBatch(urls []string) map[string]string
-	GetURL(code string) (string, bool)
-	Insert(url, code string) error
-	InsertBatch(batch [][]string) error
+	GetCode(ctx context.Context, url string) (string, bool)
+	GetCodeBatch(ctx context.Context, urls []string) map[string]string
+	GetURL(ctx context.Context, code string) (string, bool)
+	Insert(ctx context.Context, url, code string) error
+	InsertBatch(ctx context.Context, batch [][]string) error
 	Count() int
 	Truncate() error
 	Ping() error

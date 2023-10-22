@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"fmt"
 	"github.com/GearFramework/urlshort/internal/pkg"
 	"github.com/GearFramework/urlshort/internal/pkg/logger"
@@ -13,26 +14,26 @@ const (
 	defShortLen = 8
 )
 
-func (app *ShortApp) EncodeURL(url string) (string, bool) {
+func (app *ShortApp) EncodeURL(ctx context.Context, url string) (string, bool) {
 	app.Store.Lock()
 	defer app.Store.Unlock()
-	code, exists := app.Store.GetCode(url)
+	code, exists := app.Store.GetCode(ctx, url)
 	if !exists {
 		code = app.getRandomString(defShortLen)
-		if err := app.Store.Insert(url, code); err != nil {
+		if err := app.Store.Insert(ctx, url, code); err != nil {
 			logger.Log.Error(err.Error())
 		}
 	}
 	return fmt.Sprintf("%s/%s", app.Conf.ShortURLHost, code), exists
 }
 
-func (app *ShortApp) BatchEncodeURL(batch []pkg.BatchURLs) []pkg.ResultBatchShort {
+func (app *ShortApp) BatchEncodeURL(ctx context.Context, batch []pkg.BatchURLs) []pkg.ResultBatchShort {
 	app.Store.Lock()
 	defer app.Store.Unlock()
 	res := []pkg.ResultBatchShort{}
 	trc, urls := transformBatchByCorrelation(batch)
 	for _, chunkURLs := range chunkingURLs(urls) {
-		existCodes := app.Store.GetCodeBatch(chunkURLs)
+		existCodes := app.Store.GetCodeBatch(ctx, chunkURLs)
 		for existURL, existCode := range existCodes {
 			res = append(res, pkg.ResultBatchShort{
 				CorrelationID: trc[existURL],
@@ -44,7 +45,7 @@ func (app *ShortApp) BatchEncodeURL(batch []pkg.BatchURLs) []pkg.ResultBatchShor
 		}
 		notExistCodes := getNotExists(chunkURLs, existCodes)
 		newShortURLs, pack := app.prepareNotExistsShortURLs(trc, notExistCodes)
-		if err := app.Store.InsertBatch(pack); err != nil {
+		if err := app.Store.InsertBatch(ctx, pack); err != nil {
 			logger.Log.Error(err.Error())
 			continue
 		}

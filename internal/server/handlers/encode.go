@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-func EncodeURL(api pkg.APIShortener, ctx *gin.Context) {
+func EncodeURL(ctx *gin.Context, api pkg.APIShortener) {
 	body, err := io.ReadAll(ctx.Request.Body)
 	defer ctx.Request.Body.Close()
 	if err != nil {
@@ -29,7 +29,7 @@ func EncodeURL(api pkg.APIShortener, ctx *gin.Context) {
 		ctx.Status(http.StatusBadRequest)
 		return
 	}
-	shortURL, conflict := api.EncodeURL(url)
+	shortURL, conflict := api.EncodeURL(ctx, url)
 	status := http.StatusCreated
 	logger.Log.Infof("Request url: %s short url: %s\n", url, shortURL)
 	if conflict {
@@ -50,7 +50,7 @@ type ResponseJSON struct {
 
 type ResponseBatchJSON pkg.ResultBatchShort
 
-func EncodeURLFromJSON(api pkg.APIShortener, ctx *gin.Context) {
+func EncodeURLFromJSON(ctx *gin.Context, api pkg.APIShortener) {
 	if !strings.Contains(ctx.Request.Header.Get("Content-Type"), "application/json") {
 		logger.Log.Errorf(
 			"invalid request header: Content-Type %s\n",
@@ -67,7 +67,7 @@ func EncodeURLFromJSON(api pkg.APIShortener, ctx *gin.Context) {
 		ctx.Status(http.StatusBadRequest)
 		return
 	}
-	res, conflict := api.EncodeURL(req.URL)
+	res, conflict := api.EncodeURL(ctx, req.URL)
 	resp := ResponseJSON{res}
 	status := http.StatusCreated
 	logger.Log.Infof("Request url: %s short url: %s\n", req.URL, resp.Result)
@@ -77,7 +77,7 @@ func EncodeURLFromJSON(api pkg.APIShortener, ctx *gin.Context) {
 	ctx.JSON(status, resp)
 }
 
-func BatchEncodeURLs(api pkg.APIShortener, ctx *gin.Context) {
+func BatchEncodeURLs(ctx *gin.Context, api pkg.APIShortener) {
 	if !strings.Contains(ctx.Request.Header.Get("Content-Type"), "application/json") {
 		logger.Log.Errorf(
 			"invalid request header: Content-Type %s\n",
@@ -94,7 +94,7 @@ func BatchEncodeURLs(api pkg.APIShortener, ctx *gin.Context) {
 		ctx.Status(http.StatusBadRequest)
 		return
 	}
-	resp := api.BatchEncodeURL(req)
+	resp := api.BatchEncodeURL(ctx, req)
 	//logger.Log.Infof("Request url: %s short url: %s\n", req.URL, resp.Result)
 	ctx.JSON(http.StatusCreated, resp)
 }

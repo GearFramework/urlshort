@@ -6,6 +6,7 @@ import (
 	"github.com/GearFramework/urlshort/internal/pkg/logger"
 	"github.com/jmoiron/sqlx"
 	"sync"
+	"time"
 )
 
 type Storage struct {
@@ -43,9 +44,9 @@ func (s *Storage) Close() {
 	s.connection.Close()
 }
 
-func (s *Storage) GetCode(url string) (string, bool) {
+func (s *Storage) GetCode(ctx context.Context, url string) (string, bool) {
 	var code string
-	err := s.connection.DB.GetContext(context.Background(), &code, `
+	err := s.connection.DB.GetContext(ctx, &code, `
 		SELECT code 
 		  FROM urls.shortly 
 		 WHERE url = $1
@@ -53,7 +54,7 @@ func (s *Storage) GetCode(url string) (string, bool) {
 	return code, err == nil
 }
 
-func (s *Storage) GetCodeBatch(batch []string) map[string]string {
+func (s *Storage) GetCodeBatch(ctx context.Context, batch []string) map[string]string {
 	codes := map[string]string{}
 	q, args, err := sqlx.In(`
 		SELECT code, url 
@@ -65,7 +66,7 @@ func (s *Storage) GetCodeBatch(batch []string) map[string]string {
 		return codes
 	}
 	q = sqlx.Rebind(sqlx.DOLLAR, q)
-	rows, err := s.connection.DB.QueryContext(context.Background(), q, args...)
+	rows, err := s.connection.DB.QueryContext(ctx, q, args...)
 	if err != nil {
 		logger.Log.Error(err.Error())
 		return codes
@@ -85,9 +86,9 @@ func (s *Storage) GetCodeBatch(batch []string) map[string]string {
 	return codes
 }
 
-func (s *Storage) GetURL(code string) (string, bool) {
+func (s *Storage) GetURL(ctx context.Context, code string) (string, bool) {
 	var url string
-	err := s.connection.DB.GetContext(context.Background(), &url, `
+	err := s.connection.DB.GetContext(ctx, &url, `
 		SELECT url 
 		  FROM urls.shortly 
 		 WHERE code = $1
@@ -95,16 +96,15 @@ func (s *Storage) GetURL(code string) (string, bool) {
 	return url, err == nil
 }
 
-func (s *Storage) Insert(url, code string) error {
-	_, err := s.connection.DB.ExecContext(context.Background(), `
+func (s *Storage) Insert(ctx context.Context, url, code string) error {
+	_, err := s.connection.DB.ExecContext(ctx, `
 		INSERT INTO urls.shortly (url, code) 
 		VALUES ($1, $2)
 	`, url, code)
 	return err
 }
 
-func (s *Storage) InsertBatch(batch [][]string) error {
-	ctx := context.Background()
+func (s *Storage) InsertBatch(ctx context.Context, batch [][]string) error {
 	var err error
 	tx, err := s.connection.DB.BeginTx(ctx, &sql.TxOptions{})
 	if err != nil {
@@ -131,7 +131,9 @@ func (s *Storage) InsertBatch(batch [][]string) error {
 
 func (s *Storage) Count() int {
 	var count int
-	if err := s.connection.DB.GetContext(context.Background(), &count, `
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := s.connection.DB.GetContext(ctx, &count, `
         SELECT COUNT(*) AS total_items
           FROM urls.shortly
     `); err != nil {
@@ -142,7 +144,9 @@ func (s *Storage) Count() int {
 }
 
 func (s *Storage) Truncate() error {
-	_, err := s.connection.DB.ExecContext(context.Background(), `
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	_, err := s.connection.DB.ExecContext(ctx, `
 		TRUNCATE urls.shortly RESTART IDENTITY
 	`)
 	if err != nil {
