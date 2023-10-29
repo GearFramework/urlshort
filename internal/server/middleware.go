@@ -38,6 +38,7 @@ func (s *Server) auth() gin.HandlerFunc {
 		c, err := ctx.Request.Cookie(CookieParamName)
 		// кука не установлена, создаём пользователя с новым userID
 		if err != nil || c == nil || c.Value == "" {
+			logger.Log.Infoln("empty token in cookie; need new token")
 			if userID, err = s.AuthNewUser(ctx); err != nil {
 				ctx.AbortWithStatus(http.StatusInternalServerError)
 				return
@@ -47,6 +48,7 @@ func (s *Server) auth() gin.HandlerFunc {
 			return
 		}
 		// пытаемся из токена получить userID
+		logger.Log.Infof("token in cookie: %s", c.Value)
 		if userID, err = s.AuthFromToken(ctx, c.Value); err != nil {
 			ctx.AbortWithStatus(http.StatusInternalServerError)
 			return
@@ -70,11 +72,11 @@ func (s *Server) AuthNewUser(ctx *gin.Context) (int, error) {
 
 func (s *Server) AuthFromToken(ctx *gin.Context, token string) (int, error) {
 	userID, err := s.api.Auth(token)
-	if err != nil && err == auth.InvalidAuthorization {
+	if err != nil && err == auth.ErrInvalidAuthorization {
 		ctx.AbortWithStatus(http.StatusUnauthorized)
 		return 0, err
 	}
-	if err != nil && err == auth.NeedAuthorization {
+	if err != nil && err == auth.ErrNeedAuthorization {
 		return s.AuthNewUser(ctx)
 	}
 	return userID, err

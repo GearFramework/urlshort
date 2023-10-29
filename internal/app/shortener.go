@@ -87,9 +87,9 @@ func (app *ShortApp) isValidStorage(store pkg.Storable) error {
 func (app *ShortApp) Auth(token string) (int, error) {
 	userID := auth.GetUserIDFromJWT(token)
 	if userID == -1 {
-		return userID, auth.NeedAuthorization
+		return userID, auth.ErrNeedAuthorization
 	} else if userID == 0 {
-		return userID, auth.InvalidAuthorization
+		return userID, auth.ErrInvalidAuthorization
 	}
 	return userID, nil
 }

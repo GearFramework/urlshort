@@ -13,8 +13,8 @@ const (
 	SecretKey    = "bu7HBJD&873HVHJdh*Jbhsfdfs8622Dsf"
 )
 
-var NeedAuthorization = errors.New("Требуется авторизация")
-var InvalidAuthorization = errors.New("Отсутствует ID пользователя")
+var ErrNeedAuthorization = errors.New("требуется авторизация")
+var ErrInvalidAuthorization = errors.New("отсутствует ID пользователя")
 
 type Claims struct {
 	jwt.RegisteredClaims
@@ -40,7 +40,7 @@ func GetUserIDFromJWT(tk string) int {
 	if err != nil {
 		return -1
 	}
-	logger.Log.Infof("user ID: %d", claims.UserID)
+	logger.Log.Infof("app user ID: %d", claims.UserID)
 	return claims.UserID
 }
 

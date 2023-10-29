@@ -136,7 +136,7 @@ func (s *Storage) GetUserURLs(ctx context.Context, userID int) []pkg.UserURL {
 		if err != nil {
 			break
 		}
-		userURLs = append(userURLs, pkg.UserURL{Code: code, Url: url})
+		userURLs = append(userURLs, pkg.UserURL{Code: code, URL: url})
 	}
 	if err = rows.Err(); err != nil {
 		logger.Log.Warn(err.Error())

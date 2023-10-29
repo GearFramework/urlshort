@@ -101,7 +101,7 @@ func (s *Storage) GetUserURLs(ctx context.Context, userID int) []pkg.UserURL {
 	userURLs := []pkg.UserURL{}
 	for url, userShortURL := range s.codeByURL {
 		if userShortURL.UserID == userID {
-			userURLs = append(userURLs, pkg.UserURL{Code: userShortURL.Code, Url: url})
+			userURLs = append(userURLs, pkg.UserURL{Code: userShortURL.Code, URL: url})
 		}
 	}
 	return userURLs

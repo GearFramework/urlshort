@@ -21,7 +21,7 @@ type ResultBatchShort struct {
 
 type UserURL struct {
 	Code string `json:"short_url"`
-	Url  string `json:"original_url"`
+	URL  string `json:"original_url"`
 }
 
 type APIShortener interface {
