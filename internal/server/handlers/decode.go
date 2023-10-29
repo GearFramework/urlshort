@@ -2,20 +2,20 @@ package handlers
 
 import (
 	"github.com/GearFramework/urlshort/internal/pkg"
+	"github.com/GearFramework/urlshort/internal/pkg/logger"
 	"github.com/gin-gonic/gin"
-	"log"
 	"net/http"
 )
 
-func DecodeURL(api pkg.APIShortener, ctx *gin.Context) {
+func DecodeURL(ctx *gin.Context, api pkg.APIShortener) {
 	code := ctx.Param("code")
-	url, err := api.DecodeURL(code)
+	url, err := api.DecodeURL(ctx, code)
 	if err != nil {
-		log.Printf("Error: %s\n", err.Error())
+		logger.Log.Errorf("%s\n", err.Error())
 		ctx.Status(http.StatusBadRequest)
 		return
 	}
-	log.Printf("Request short code: %s url: %s", code, url)
+	logger.Log.Infof("Request short code: %s url: %s", code, url)
 	ctx.Header("Location", url)
 	ctx.Status(http.StatusTemporaryRedirect)
 	ctx.Done()
