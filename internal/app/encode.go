@@ -14,20 +14,20 @@ const (
 	defShortLen = 8
 )
 
-func (app *ShortApp) EncodeURL(ctx context.Context, url string) (string, bool) {
+func (app *ShortApp) EncodeURL(ctx context.Context, userID int, url string) (string, bool) {
 	app.Store.Lock()
 	defer app.Store.Unlock()
 	code, exists := app.Store.GetCode(ctx, url)
 	if !exists {
 		code = app.getRandomString(defShortLen)
-		if err := app.Store.Insert(ctx, url, code); err != nil {
+		if err := app.Store.Insert(ctx, userID, url, code); err != nil {
 			logger.Log.Error(err.Error())
 		}
 	}
 	return fmt.Sprintf("%s/%s", app.Conf.ShortURLHost, code), exists
 }
 
-func (app *ShortApp) BatchEncodeURL(ctx context.Context, batch []pkg.BatchURLs) []pkg.ResultBatchShort {
+func (app *ShortApp) BatchEncodeURL(ctx context.Context, userID int, batch []pkg.BatchURLs) []pkg.ResultBatchShort {
 	app.Store.Lock()
 	defer app.Store.Unlock()
 	res := []pkg.ResultBatchShort{}
@@ -45,7 +45,7 @@ func (app *ShortApp) BatchEncodeURL(ctx context.Context, batch []pkg.BatchURLs) 
 		}
 		notExistCodes := getNotExists(chunkURLs, existCodes)
 		newShortURLs, pack := app.prepareNotExistsShortURLs(trc, notExistCodes)
-		if err := app.Store.InsertBatch(ctx, pack); err != nil {
+		if err := app.Store.InsertBatch(ctx, userID, pack); err != nil {
 			logger.Log.Error(err.Error())
 			continue
 		}

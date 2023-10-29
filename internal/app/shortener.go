@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/GearFramework/urlshort/internal/config"
 	"github.com/GearFramework/urlshort/internal/pkg"
+	"github.com/GearFramework/urlshort/internal/pkg/auth"
 	"github.com/GearFramework/urlshort/internal/pkg/logger"
 	"github.com/GearFramework/urlshort/internal/pkg/storage/db"
 	"github.com/GearFramework/urlshort/internal/pkg/storage/file"
@@ -18,11 +19,14 @@ import (
 type ShortApp struct {
 	Conf         *config.ServiceConfig
 	Store        pkg.Storable
+	GenID        *UserGenID
 	flushCounter int
 }
 
 func NewShortener(conf *config.ServiceConfig) (*ShortApp, error) {
-	shortener := ShortApp{Conf: conf}
+	shortener := ShortApp{
+		Conf: conf,
+	}
 	err := shortener.initApp()
 	return &shortener, err
 }
@@ -30,7 +34,17 @@ func NewShortener(conf *config.ServiceConfig) (*ShortApp, error) {
 func (app *ShortApp) initApp() error {
 	var err error
 	app.Store, err = app.factoryStorage()
-	return err
+	if err != nil {
+		return err
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	maxUserID, err := app.Store.GetMaxUserID(ctx)
+	if err != nil {
+		return err
+	}
+	app.GenID = &UserGenID{lastID: maxUserID}
+	return nil
 }
 
 func (app *ShortApp) factoryStorage() (pkg.Storable, error) {
@@ -42,6 +56,8 @@ func (app *ShortApp) factoryStorage() (pkg.Storable, error) {
 		if err := app.isValidStorage(store); err == nil {
 			log.Println("Use database urls storage")
 			return store, nil
+		} else {
+			log.Println(err.Error())
 		}
 	} else if app.Conf.StorageFilePath != "" {
 		store := file.NewStorage(&file.StorageConfig{
@@ -68,8 +84,28 @@ func (app *ShortApp) isValidStorage(store pkg.Storable) error {
 	return store.Ping()
 }
 
-func (app *ShortApp) AddShortly(ctx context.Context, url, code string) {
-	if err := app.Store.Insert(ctx, url, code); err != nil {
+func (app *ShortApp) Auth(token string) (int, error) {
+	userID := auth.GetUserIDFromJWT(token)
+	if userID == -1 {
+		return userID, auth.NeedAuthorization
+	} else if userID == 0 {
+		return userID, auth.InvalidAuthorization
+	}
+	return userID, nil
+}
+
+func (app *ShortApp) CreateToken() (int, string, error) {
+	userID := app.GenerateUserID()
+	token, err := auth.BuildJWT(userID)
+	return userID, token, err
+}
+
+func (app *ShortApp) GenerateUserID() int {
+	return app.GenID.GetID()
+}
+
+func (app *ShortApp) AddShortly(ctx context.Context, userID int, url, code string) {
+	if err := app.Store.Insert(ctx, userID, url, code); err != nil {
 		logger.Log.Error(err.Error())
 	}
 }

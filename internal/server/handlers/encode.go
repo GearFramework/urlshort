@@ -29,7 +29,8 @@ func EncodeURL(ctx *gin.Context, api pkg.APIShortener) {
 		ctx.Status(http.StatusBadRequest)
 		return
 	}
-	shortURL, conflict := api.EncodeURL(ctx, url)
+	userID, _ := ctx.Get("userID")
+	shortURL, conflict := api.EncodeURL(ctx, userID.(int), url)
 	status := http.StatusCreated
 	logger.Log.Infof("Request url: %s short url: %s\n", url, shortURL)
 	if conflict {
@@ -67,7 +68,8 @@ func EncodeURLFromJSON(ctx *gin.Context, api pkg.APIShortener) {
 		ctx.Status(http.StatusBadRequest)
 		return
 	}
-	res, conflict := api.EncodeURL(ctx, req.URL)
+	userID, _ := ctx.Get(pkg.UserIDParamName)
+	res, conflict := api.EncodeURL(ctx, userID.(int), req.URL)
 	resp := ResponseJSON{res}
 	status := http.StatusCreated
 	logger.Log.Infof("Request url: %s short url: %s\n", req.URL, resp.Result)
@@ -94,7 +96,12 @@ func BatchEncodeURLs(ctx *gin.Context, api pkg.APIShortener) {
 		ctx.Status(http.StatusBadRequest)
 		return
 	}
-	resp := api.BatchEncodeURL(ctx, req)
+	userID, ok := ctx.Get(pkg.UserIDParamName)
+	if !ok {
+		ctx.Status(http.StatusNoContent)
+		return
+	}
+	resp := api.BatchEncodeURL(ctx, userID.(int), req)
 	//logger.Log.Infof("Request url: %s short url: %s\n", req.URL, resp.Result)
 	ctx.JSON(http.StatusCreated, resp)
 }

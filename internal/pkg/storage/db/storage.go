@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"database/sql"
+	"github.com/GearFramework/urlshort/internal/pkg"
 	"github.com/GearFramework/urlshort/internal/pkg/logger"
 	"github.com/jmoiron/sqlx"
 	"sync"
@@ -34,8 +35,15 @@ func (s *Storage) InitStorage() error {
 		CREATE TABLE IF NOT EXISTS urls.shortly (
 		    code VARCHAR(8),
 			url VARCHAR(1024),
+			user_id INT NOT NULL, 
 		    CONSTRAINT code_url PRIMARY KEY (code, url)
 		)
+	`)
+	if err != nil {
+		return err
+	}
+	_, err = s.connection.DB.ExecContext(context.Background(), `
+		CREATE INDEX IF NOT EXISTS idx_user_id ON urls.shortly (user_id)
 	`)
 	return err
 }
@@ -96,29 +104,69 @@ func (s *Storage) GetURL(ctx context.Context, code string) (string, bool) {
 	return url, err == nil
 }
 
-func (s *Storage) Insert(ctx context.Context, url, code string) error {
+func (s *Storage) GetMaxUserID(ctx context.Context) (int, error) {
+	var maxUserID int
+	err := s.connection.DB.GetContext(ctx, &maxUserID, `
+		SELECT CASE 
+		  WHEN usr.max_user_id IS NULL THEN 0
+          ELSE usr.max_user_id
+           END AS max_user_id
+		  FROM (SELECT MAX(user_id) AS max_user_id 
+		          FROM urls.shortly
+		  ) AS usr
+	`)
+	return maxUserID, err
+}
+
+func (s *Storage) GetUserURLs(ctx context.Context, userID int) []pkg.UserURL {
+	userURLs := []pkg.UserURL{}
+	rows, err := s.connection.DB.QueryContext(ctx, `
+		SELECT url, code 
+		  FROM urls.shortly 
+		 WHERE user_id = $1
+ 	`, userID)
+	if err != nil {
+		logger.Log.Error(err.Error())
+		return userURLs
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var code, url string
+		err := rows.Scan(&code, &url)
+		if err != nil {
+			break
+		}
+		userURLs = append(userURLs, pkg.UserURL{Code: code, Url: url})
+	}
+	if err = rows.Err(); err != nil {
+		logger.Log.Warn(err.Error())
+	}
+	return userURLs
+}
+
+func (s *Storage) Insert(ctx context.Context, userID int, url, code string) error {
 	_, err := s.connection.DB.ExecContext(ctx, `
-		INSERT INTO urls.shortly (url, code) 
-		VALUES ($1, $2)
-	`, url, code)
+		INSERT INTO urls.shortly (url, code, user_id) 
+		VALUES ($1, $2, $3)
+	`, url, code, userID)
 	return err
 }
 
-func (s *Storage) InsertBatch(ctx context.Context, batch [][]string) error {
+func (s *Storage) InsertBatch(ctx context.Context, userID int, batch [][]string) error {
 	var err error
 	tx, err := s.connection.DB.BeginTx(ctx, &sql.TxOptions{})
 	if err != nil {
 		return err
 	}
 	stmt, err := tx.PrepareContext(ctx, `
-		INSERT INTO urls.shortly (url, code) 
-		VALUES ($1, $2)
+		INSERT INTO urls.shortly (url, code, user_id) 
+		VALUES ($1, $2, $3)
 	`)
 	if err != nil {
 		return err
 	}
 	for _, data := range batch {
-		_, err = stmt.ExecContext(ctx, data[0], data[1])
+		_, err = stmt.ExecContext(ctx, data[0], data[1], userID)
 		if err != nil {
 			if err := tx.Rollback(); err != nil {
 				logger.Log.Error(err.Error())

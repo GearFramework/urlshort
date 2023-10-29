@@ -18,8 +18,8 @@ func TestDecodeURL(t *testing.T) {
 	assert.Equal(t, 0, shortener.Store.Count())
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	shortener.AddShortly(ctx, "http://ya.ru", "dHGfdhj4")
-	shortener.AddShortly(ctx, "http://yandex.ru", "78gsshSd")
+	shortener.AddShortly(ctx, 1, "http://ya.ru", "dHGfdhj4")
+	shortener.AddShortly(ctx, 1, "http://yandex.ru", "78gsshSd")
 	assert.Equal(t, 2, shortener.Store.Count())
 	testCodes := []struct {
 		code  string

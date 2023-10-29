@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/GearFramework/urlshort/internal/pkg"
 	"github.com/GearFramework/urlshort/internal/pkg/logger"
 	"io"
 	"log"
@@ -11,13 +12,20 @@ import (
 	"sync"
 )
 
+type Codes struct {
+	Code   string `json:"code"`
+	UserID int    `json:"user_id"`
+}
+
 type Storage struct {
 	sync.RWMutex
 	Config       *StorageConfig
-	codeByURL    map[string]string
+	codeByURL    map[string]Codes
 	urlByCode    map[string]string
 	flushCounter int
 }
+
+var lastUserID int = 0
 
 func NewStorage(config *StorageConfig) *Storage {
 	return &Storage{
@@ -26,7 +34,7 @@ func NewStorage(config *StorageConfig) *Storage {
 }
 
 func (s *Storage) InitStorage() error {
-	s.codeByURL = make(map[string]string, s.Config.FlushPerItems)
+	s.codeByURL = make(map[string]Codes, s.Config.FlushPerItems)
 	s.urlByCode = make(map[string]string, s.Config.FlushPerItems)
 	s.flushCounter = s.Config.FlushPerItems
 	err := s.loadShortlyURLs()
@@ -46,8 +54,11 @@ func (s *Storage) loadShortlyURLs() error {
 		return err
 	}
 	s.urlByCode = make(map[string]string, s.Config.FlushPerItems)
-	for url, code := range s.codeByURL {
-		s.urlByCode[code] = url
+	for url, data := range s.codeByURL {
+		s.urlByCode[data.Code] = url
+		if lastUserID < data.UserID {
+			lastUserID = data.UserID
+		}
 	}
 	s.flushCounter = s.Count() + s.Config.FlushPerItems
 	return nil
@@ -60,15 +71,18 @@ func (s *Storage) Close() {
 }
 
 func (s *Storage) GetCode(ctx context.Context, url string) (string, bool) {
-	code, ok := s.codeByURL[url]
-	return code, ok
+	data, ok := s.codeByURL[url]
+	if ok {
+		return data.Code, ok
+	}
+	return "", ok
 }
 
 func (s *Storage) GetCodeBatch(ctx context.Context, batch []string) map[string]string {
 	codes := map[string]string{}
 	for _, url := range batch {
 		if _, ok := s.codeByURL[url]; ok {
-			codes[url] = s.codeByURL[url]
+			codes[url] = s.codeByURL[url].Code
 		}
 	}
 	return codes
@@ -79,20 +93,37 @@ func (s *Storage) GetURL(ctx context.Context, code string) (string, bool) {
 	return url, ok
 }
 
-func (s *Storage) Insert(ctx context.Context, url, code string) error {
-	s.codeByURL[url] = code
+func (s *Storage) GetMaxUserID(ctx context.Context) (int, error) {
+	return lastUserID, nil
+}
+
+func (s *Storage) GetUserURLs(ctx context.Context, userID int) []pkg.UserURL {
+	userURLs := []pkg.UserURL{}
+	for url, userShortURL := range s.codeByURL {
+		if userShortURL.UserID == userID {
+			userURLs = append(userURLs, pkg.UserURL{Code: userShortURL.Code, Url: url})
+		}
+	}
+	return userURLs
+}
+
+func (s *Storage) Insert(ctx context.Context, userID int, url, code string) error {
+	s.codeByURL[url] = Codes{UserID: userID, Code: code}
 	s.urlByCode[code] = url
 	var err error
 	if s.mustFlush() {
 		err = s.flush()
 		s.flushCounter += s.Config.FlushPerItems
 	}
+	if lastUserID < userID {
+		lastUserID = userID
+	}
 	return err
 }
 
-func (s *Storage) InsertBatch(ctx context.Context, batch [][]string) error {
+func (s *Storage) InsertBatch(ctx context.Context, userID int, batch [][]string) error {
 	for _, pack := range batch {
-		s.codeByURL[pack[0]] = pack[1]
+		s.codeByURL[pack[0]] = Codes{UserID: userID, Code: pack[1]}
 		s.urlByCode[pack[1]] = pack[0]
 	}
 	if s.mustFlush() {
@@ -100,6 +131,9 @@ func (s *Storage) InsertBatch(ctx context.Context, batch [][]string) error {
 			logger.Log.Warn(err.Error())
 		}
 		s.flushCounter += s.Config.FlushPerItems
+	}
+	if lastUserID < userID {
+		lastUserID = userID
 	}
 	return nil
 }
@@ -126,7 +160,7 @@ func (s *Storage) flush() error {
 func (s *Storage) Truncate() error {
 	for url, code := range s.codeByURL {
 		delete(s.codeByURL, url)
-		delete(s.urlByCode, code)
+		delete(s.urlByCode, code.Code)
 	}
 	return s.flush()
 }

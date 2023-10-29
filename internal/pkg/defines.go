@@ -5,6 +5,10 @@ import (
 	"sync"
 )
 
+const (
+	UserIDParamName = "userID"
+)
+
 type BatchURLs struct {
 	CorrelationID string `json:"correlation_id"`
 	OriginalURL   string `json:"original_url"`
@@ -15,11 +19,20 @@ type ResultBatchShort struct {
 	ShortURL      string `json:"short_url"`
 }
 
+type UserURL struct {
+	Code string `json:"short_url"`
+	Url  string `json:"original_url"`
+}
+
 type APIShortener interface {
-	EncodeURL(ctx context.Context, url string) (string, bool)
-	BatchEncodeURL(ctx context.Context, batch []BatchURLs) []ResultBatchShort
+	Auth(token string) (int, error)
+	GenerateUserID() int
+	CreateToken() (int, string, error)
+	EncodeURL(ctx context.Context, userID int, url string) (string, bool)
+	BatchEncodeURL(ctx context.Context, userID int, batch []BatchURLs) []ResultBatchShort
 	DecodeURL(ctx context.Context, shortURL string) (string, error)
-	AddShortly(ctx context.Context, url, code string)
+	AddShortly(ctx context.Context, UserID int, url, code string)
+	GetUserURLs(ctx context.Context, userID int) []UserURL
 }
 
 type Storable interface {
@@ -28,10 +41,16 @@ type Storable interface {
 	GetCode(ctx context.Context, url string) (string, bool)
 	GetCodeBatch(ctx context.Context, urls []string) map[string]string
 	GetURL(ctx context.Context, code string) (string, bool)
-	Insert(ctx context.Context, url, code string) error
-	InsertBatch(ctx context.Context, batch [][]string) error
+	GetMaxUserID(ctx context.Context) (int, error)
+	GetUserURLs(ctx context.Context, userID int) []UserURL
+	Insert(ctx context.Context, userID int, url, code string) error
+	InsertBatch(ctx context.Context, userID int, batch [][]string) error
 	Count() int
 	Truncate() error
 	Ping() error
 	Close()
+}
+
+type GeneratorID interface {
+	GetID() int
 }

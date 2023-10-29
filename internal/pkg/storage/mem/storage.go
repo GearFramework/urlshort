@@ -2,10 +2,17 @@ package mem
 
 import (
 	"context"
+	"github.com/GearFramework/urlshort/internal/pkg"
 	"sync"
 )
 
-type mapCodes map[string]string
+type mapCodes map[string]Codes
+
+type Codes struct {
+	Code   string
+	UserID int
+}
+
 type mapURLs map[string]string
 
 type Storage struct {
@@ -13,6 +20,8 @@ type Storage struct {
 	codeByURL mapCodes
 	urlByCode mapURLs
 }
+
+var lastUserID int = 0
 
 func NewStorage() *Storage {
 	return &Storage{}
@@ -28,15 +37,18 @@ func (s *Storage) Close() {
 }
 
 func (s *Storage) GetCode(ctx context.Context, url string) (string, bool) {
-	code, ok := s.codeByURL[url]
-	return code, ok
+	data, ok := s.codeByURL[url]
+	if ok {
+		return data.Code, ok
+	}
+	return "", ok
 }
 
 func (s *Storage) GetCodeBatch(ctx context.Context, batch []string) map[string]string {
 	codes := map[string]string{}
 	for _, url := range batch {
 		if _, ok := s.codeByURL[url]; ok {
-			codes[url] = s.codeByURL[url]
+			codes[url] = s.codeByURL[url].Code
 		}
 	}
 	return codes
@@ -47,16 +59,36 @@ func (s *Storage) GetURL(ctx context.Context, code string) (string, bool) {
 	return url, ok
 }
 
-func (s *Storage) Insert(ctx context.Context, url, code string) error {
-	s.codeByURL[url] = code
+func (s *Storage) GetMaxUserID(ctx context.Context) (int, error) {
+	return lastUserID, nil
+}
+
+func (s *Storage) GetUserURLs(ctx context.Context, userID int) []pkg.UserURL {
+	userURLs := []pkg.UserURL{}
+	for url, userShortURL := range s.codeByURL {
+		if userShortURL.UserID == userID {
+			userURLs = append(userURLs, pkg.UserURL{Code: userShortURL.Code, Url: url})
+		}
+	}
+	return userURLs
+}
+
+func (s *Storage) Insert(ctx context.Context, userID int, url, code string) error {
+	s.codeByURL[url] = Codes{UserID: userID, Code: code}
 	s.urlByCode[code] = url
+	if lastUserID < userID {
+		lastUserID = userID
+	}
 	return nil
 }
 
-func (s *Storage) InsertBatch(ctx context.Context, batch [][]string) error {
+func (s *Storage) InsertBatch(ctx context.Context, userID int, batch [][]string) error {
 	for _, pack := range batch {
-		s.codeByURL[pack[0]] = pack[1]
+		s.codeByURL[pack[0]] = Codes{UserID: userID, Code: pack[1]}
 		s.urlByCode[pack[1]] = pack[0]
+	}
+	if lastUserID < userID {
+		lastUserID = userID
 	}
 	return nil
 }
@@ -68,7 +100,7 @@ func (s *Storage) Count() int {
 func (s *Storage) Truncate() error {
 	for url, code := range s.codeByURL {
 		delete(s.codeByURL, url)
-		delete(s.urlByCode, code)
+		delete(s.urlByCode, code.Code)
 	}
 	return nil
 }
