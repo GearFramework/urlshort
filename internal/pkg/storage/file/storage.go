@@ -13,8 +13,9 @@ import (
 )
 
 type Codes struct {
-	Code   string `json:"code"`
-	UserID int    `json:"user_id"`
+	Code      string `json:"code"`
+	UserID    int    `json:"user_id"`
+	IsDeleted bool   `json:"is_deleted"`
 }
 
 type Storage struct {
@@ -88,9 +89,14 @@ func (s *Storage) GetCodeBatch(ctx context.Context, batch []string) map[string]s
 	return codes
 }
 
-func (s *Storage) GetURL(ctx context.Context, code string) (string, bool) {
+func (s *Storage) GetURL(ctx context.Context, code string) (pkg.ShortURL, bool) {
 	url, ok := s.urlByCode[code]
-	return url, ok
+	short := pkg.ShortURL{}
+	if ok {
+		short.URL = url
+		short.IsDeleted = s.codeByURL[url].IsDeleted
+	}
+	return short, ok
 }
 
 func (s *Storage) GetMaxUserID(ctx context.Context) (int, error) {
@@ -136,6 +142,19 @@ func (s *Storage) InsertBatch(ctx context.Context, userID int, batch [][]string)
 		lastUserID = userID
 	}
 	return nil
+}
+
+func (s *Storage) DeleteBatch(ctx context.Context, userID int, batch []string) {
+	s.Lock()
+	defer s.Unlock()
+	for _, code := range batch {
+		url, ok := s.urlByCode[code]
+		if ok && s.codeByURL[url].UserID == userID {
+			short := s.codeByURL[url]
+			short.IsDeleted = true
+			s.codeByURL[url] = short
+		}
+	}
 }
 
 func (s *Storage) mustFlush() bool {

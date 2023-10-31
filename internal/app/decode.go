@@ -5,6 +5,8 @@ import (
 	"errors"
 )
 
+var ErrShortURLIsDeleted = errors.New("short url is deleted")
+
 func (app *ShortApp) DecodeURL(ctx context.Context, code string) (string, error) {
 	app.Store.Lock()
 	defer app.Store.Unlock()
@@ -12,5 +14,8 @@ func (app *ShortApp) DecodeURL(ctx context.Context, code string) (string, error)
 	if !exists {
 		return "", errors.New("invalid short url " + code)
 	}
-	return url, nil
+	if url.IsDeleted {
+		return "", ErrShortURLIsDeleted
+	}
+	return url.URL, nil
 }

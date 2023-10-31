@@ -36,6 +36,7 @@ func (s *Storage) InitStorage() error {
 		    code VARCHAR(8),
 			url VARCHAR(1024),
 			user_id INT NOT NULL, 
+			is_deleted BOOLEAN DEFAULT false,
 		    CONSTRAINT code_url PRIMARY KEY (code, url)
 		)
 	`)
@@ -94,10 +95,10 @@ func (s *Storage) GetCodeBatch(ctx context.Context, batch []string) map[string]s
 	return codes
 }
 
-func (s *Storage) GetURL(ctx context.Context, code string) (string, bool) {
-	var url string
+func (s *Storage) GetURL(ctx context.Context, code string) (pkg.ShortURL, bool) {
+	var url pkg.ShortURL
 	err := s.connection.DB.GetContext(ctx, &url, `
-		SELECT url 
+		SELECT url, is_deleted 
 		  FROM urls.shortly 
 		 WHERE code = $1
  	`, code)
@@ -175,6 +176,26 @@ func (s *Storage) InsertBatch(ctx context.Context, userID int, batch [][]string)
 		}
 	}
 	return tx.Commit()
+}
+
+func (s *Storage) DeleteBatch(ctx context.Context, userID int, batch []string) {
+	q, args, err := sqlx.In(`
+		UPDATE urls.shortly
+		   SET is_deleted = true 
+		 WHERE user_id = ?
+		   AND code IN (?)
+	`, userID, batch)
+	if err != nil {
+		logger.Log.Error(err.Error())
+		return
+	}
+	q = sqlx.Rebind(sqlx.DOLLAR, q)
+	_, err = s.connection.DB.ExecContext(ctx, q, args...)
+	if err != nil {
+		logger.Log.Error(err.Error())
+		return
+	}
+	logger.Log.Infof("well done mark short urls %v as delete", batch)
 }
 
 func (s *Storage) Count() int {
