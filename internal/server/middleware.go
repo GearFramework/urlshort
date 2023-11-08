@@ -79,6 +79,7 @@ func (s *Server) AuthFromToken(ctx *gin.Context, token string) (int, error) {
 	if err != nil && err == auth.ErrNeedAuthorization {
 		return s.AuthNewUser(ctx)
 	}
+	s.setAuthCookie(ctx, token)
 	return userID, err
 }
 
