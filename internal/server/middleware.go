@@ -88,7 +88,7 @@ func (s *Server) setAuthCookie(ctx *gin.Context, token string) {
 		token,
 		int(auth.TokenExpired.Seconds()),
 		"/",
-		"localhost",
+		s.Conf.Addr,
 		true,
 		true,
 	)
