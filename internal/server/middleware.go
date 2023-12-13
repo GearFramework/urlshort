@@ -8,6 +8,7 @@ import (
 	"github.com/GearFramework/urlshort/internal/pkg/logger"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"net/url"
 	"time"
 )
 
@@ -84,11 +85,17 @@ func (s *Server) AuthFromToken(ctx *gin.Context, token string) (int, error) {
 }
 
 func (s *Server) setAuthCookie(ctx *gin.Context, token string) {
+	uri, err := url.Parse(fmt.Sprintf("http://%s/", s.Conf.Addr))
+	if err != nil {
+		logger.Log.Errorf("Parse URL error: %s\n", err.Error())
+		return
+	}
+	logger.Log.Infof("Set cookie domain: %s; token: %s", uri.Hostname(), token)
 	ctx.SetCookie(CookieParamName,
 		token,
 		int(auth.TokenExpired.Seconds()),
 		"/",
-		s.Conf.Addr,
+		uri.Hostname(),
 		true,
 		true,
 	)
