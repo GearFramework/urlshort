@@ -90,12 +90,16 @@ func (s *Server) setAuthCookie(ctx *gin.Context, token string) {
 		logger.Log.Errorf("Parse URL error: %s\n", err.Error())
 		return
 	}
-	logger.Log.Infof("Set cookie domain: %s; token: %s", uri.Hostname(), token)
+	cookieDomain := uri.Hostname()
+	if cookieDomain == "" {
+		cookieDomain = "localhost"
+	}
+	logger.Log.Infof("Set cookie domain: %s; token: %s", cookieDomain, token)
 	ctx.SetCookie(CookieParamName,
 		token,
 		int(auth.TokenExpired.Seconds()),
 		"/",
-		uri.Hostname(),
+		cookieDomain,
 		true,
 		true,
 	)
