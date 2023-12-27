@@ -31,7 +31,7 @@ func (s *Server) compress() gin.HandlerFunc {
 	return compresser.NewCompressor()
 }
 
-const CookieParamName = "Athorization"
+const CookieParamName = "Authorization"
 
 func (s *Server) auth() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
@@ -54,7 +54,7 @@ func (s *Server) auth() gin.HandlerFunc {
 			ctx.AbortWithStatus(http.StatusInternalServerError)
 			return
 		}
-		logger.Log.Infof("Authorized user with ID: %d", userID)
+		logger.Log.Infof("Authorized user as ID: %d", userID)
 		ctx.Set(pkg.UserIDParamName, userID)
 		ctx.Next()
 	}
@@ -80,7 +80,6 @@ func (s *Server) AuthFromToken(ctx *gin.Context, token string) (int, error) {
 	if err != nil && err == auth.ErrNeedAuthorization {
 		return s.AuthNewUser(ctx)
 	}
-	s.setAuthCookie(ctx, token)
 	return userID, err
 }
 
