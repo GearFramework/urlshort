@@ -98,7 +98,7 @@ func (s *Server) setAuthCookie(ctx *gin.Context, token string) {
 		token,
 		int(auth.TokenExpired.Seconds()),
 		"/",
-		cookieDomain,
+		"",
 		true,
 		true,
 	)
