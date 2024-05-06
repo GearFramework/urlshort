@@ -21,6 +21,9 @@ func (id *UserGenID) GetID() int {
 
 func (app *ShortApp) GetUserURLs(ctx context.Context, userID int) []pkg.UserURL {
 	urls := app.Store.GetUserURLs(ctx, userID)
+	for idx, userURL := range urls {
+		urls[idx].ShortURL = app.GetShortURL(userURL.Code)
+	}
 	return urls
 }
 

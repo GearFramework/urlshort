@@ -20,8 +20,9 @@ type ResultBatchShort struct {
 }
 
 type UserURL struct {
-	Code string `json:"short_url"`
-	URL  string `json:"original_url"`
+	Code     string `json:"-"`
+	ShortURL string `json:"short_url"`
+	URL      string `json:"original_url"`
 }
 
 type ShortURL struct {
@@ -39,6 +40,7 @@ type APIShortener interface {
 	AddShortly(ctx context.Context, UserID int, url, code string)
 	GetUserURLs(ctx context.Context, userID int) []UserURL
 	DeleteUserURLs(ctx context.Context, userID int, codes []string)
+	GetShortURL(code string) string
 }
 
 type Storable interface {
