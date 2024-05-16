@@ -159,6 +159,12 @@ func (s *Storage) InsertBatch(ctx context.Context, userID int, batch [][]string)
 	if err != nil {
 		return err
 	}
+	defer func() {
+		if err != nil {
+			err = tx.Rollback()
+			logger.Log.Error(err.Error())
+		}
+	}()
 	stmt, err := tx.PrepareContext(ctx, `
 		INSERT INTO urls.shortly (url, code, user_id) 
 		VALUES ($1, $2, $3)
