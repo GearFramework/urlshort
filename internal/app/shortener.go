@@ -88,7 +88,8 @@ func (app *ShortApp) Auth(token string) (int, error) {
 	userID := auth.GetUserIDFromJWT(token)
 	if userID == -1 {
 		return userID, auth.ErrNeedAuthorization
-	} else if userID == 0 {
+	}
+	if userID == 0 {
 		return userID, auth.ErrInvalidAuthorization
 	}
 	return userID, nil

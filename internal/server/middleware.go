@@ -1,6 +1,7 @@
 package server
 
 import (
+	"errors"
 	"fmt"
 	"github.com/GearFramework/urlshort/internal/pkg"
 	"github.com/GearFramework/urlshort/internal/pkg/auth"
@@ -50,6 +51,10 @@ func (s *Server) auth() gin.HandlerFunc {
 		// пытаемся из токена получить userID
 		logger.Log.Infof("token in cookie: %s", c.Value)
 		if userID, err = s.AuthFromToken(ctx, c.Value); err != nil {
+			if errors.Is(err, auth.ErrInvalidAuthorization) {
+				ctx.AbortWithStatus(http.StatusUnauthorized)
+				return
+			}
 			ctx.AbortWithStatus(http.StatusInternalServerError)
 			return
 		}
@@ -72,11 +77,10 @@ func (s *Server) AuthNewUser(ctx *gin.Context) (int, error) {
 
 func (s *Server) AuthFromToken(ctx *gin.Context, token string) (int, error) {
 	userID, err := s.api.Auth(token)
-	if err != nil && err == auth.ErrInvalidAuthorization {
-		ctx.AbortWithStatus(http.StatusUnauthorized)
+	if err != nil && errors.Is(err, auth.ErrInvalidAuthorization) {
 		return 0, err
 	}
-	if err != nil && err == auth.ErrNeedAuthorization {
+	if err != nil && errors.Is(err, auth.ErrNeedAuthorization) {
 		return s.AuthNewUser(ctx)
 	}
 	return userID, err
