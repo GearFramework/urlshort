@@ -8,6 +8,7 @@ import (
 	"net/http"
 )
 
+// DecodeURL return url by short code
 func DecodeURL(ctx *gin.Context, api pkg.APIShortener) {
 	code := ctx.Param("code")
 	url, err := api.DecodeURL(ctx, code)

@@ -7,6 +7,7 @@ import (
 	"net/http"
 )
 
+// Ping check connection to storage
 func Ping(ctx *gin.Context, api pkg.APIShortener) {
 	if err := api.(*app.ShortApp).Store.Ping(); err != nil {
 		ctx.Status(http.StatusInternalServerError)

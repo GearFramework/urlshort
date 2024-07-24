@@ -1,5 +1,7 @@
 package main
 
+import _ "net/http/pprof"
+
 import (
 	"github.com/GearFramework/urlshort/internal/app"
 	"github.com/GearFramework/urlshort/internal/config"

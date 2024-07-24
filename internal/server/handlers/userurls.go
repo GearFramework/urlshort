@@ -9,6 +9,7 @@ import (
 	"strings"
 )
 
+// GetUserURLs handler of request on get all saved urls by user
 func GetUserURLs(ctx *gin.Context, api pkg.APIShortener) {
 	userID, ok := ctx.Get(pkg.UserIDParamName)
 	if !ok {
@@ -23,6 +24,7 @@ func GetUserURLs(ctx *gin.Context, api pkg.APIShortener) {
 	ctx.JSON(http.StatusOK, userURLs)
 }
 
+// DeleteUserURLs remove user saved urls codes by codes from request
 func DeleteUserURLs(ctx *gin.Context, api pkg.APIShortener) {
 	if !strings.Contains(ctx.Request.Header.Get("Content-Type"), "application/json") {
 		logger.Log.Errorf(

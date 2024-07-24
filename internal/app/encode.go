@@ -14,6 +14,7 @@ const (
 	defShortLen = 8
 )
 
+// EncodeURL application api for generate shortly url by requested url
 func (app *ShortApp) EncodeURL(ctx context.Context, userID int, url string) (string, bool) {
 	app.Store.Lock()
 	defer app.Store.Unlock()
@@ -27,6 +28,7 @@ func (app *ShortApp) EncodeURL(ctx context.Context, userID int, url string) (str
 	return fmt.Sprintf("%s/%s", app.Conf.ShortURLHost, code), exists
 }
 
+// BatchEncodeURL application api for generate shortly urls by requested urls in batch mode
 func (app *ShortApp) BatchEncodeURL(ctx context.Context, userID int, batch []pkg.BatchURLs) []pkg.ResultBatchShort {
 	app.Store.Lock()
 	defer app.Store.Unlock()
