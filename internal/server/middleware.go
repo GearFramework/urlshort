@@ -31,6 +31,7 @@ func (s *Server) compress() gin.HandlerFunc {
 	return compresser.NewCompressor()
 }
 
+// CookieParamName authorization param name in cookie
 const CookieParamName = "Authorization"
 
 func (s *Server) auth() gin.HandlerFunc {

@@ -9,8 +9,10 @@ import (
 )
 
 const (
+	// TokenExpired token time life
 	TokenExpired = time.Hour * 24
-	SecretKey    = "bu7HBJD&873HVHJdh*Jbhsfdfs8622Dsf"
+	// SecretKey salt
+	SecretKey = "bu7HBJD&873HVHJdh*Jbhsfdfs8622Dsf"
 )
 
 // ErrNeedAuthorization error if need authorization
