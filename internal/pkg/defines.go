@@ -5,6 +5,7 @@ import (
 	"sync"
 )
 
+// User params names
 const (
 	// UserIDParamName param name for access in cookie
 	UserIDParamName = "userID"

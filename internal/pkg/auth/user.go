@@ -8,6 +8,7 @@ import (
 	"time"
 )
 
+// user authorizations settings
 const (
 	// TokenExpired token time life
 	TokenExpired = time.Hour * 24
