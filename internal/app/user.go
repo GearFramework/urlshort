@@ -7,11 +7,13 @@ import (
 	"sync"
 )
 
+// UserGenID generator user ID
 type UserGenID struct {
 	sync.RWMutex
 	lastID int
 }
 
+// GetID generate new user ID
 func (id *UserGenID) GetID() int {
 	id.Lock()
 	defer id.Unlock()

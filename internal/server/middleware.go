@@ -64,6 +64,7 @@ func (s *Server) auth() gin.HandlerFunc {
 	}
 }
 
+// AuthNewUser register new user
 func (s *Server) AuthNewUser(ctx *gin.Context) (int, error) {
 	userID, token, err := s.api.CreateToken()
 	if err != nil {
@@ -75,6 +76,7 @@ func (s *Server) AuthNewUser(ctx *gin.Context) (int, error) {
 	return userID, nil
 }
 
+// AuthFromToken authorize user from jwt
 func (s *Server) AuthFromToken(ctx *gin.Context, token string) (int, error) {
 	userID, err := s.api.Auth(token)
 	if err != nil && errors.Is(err, auth.ErrInvalidAuthorization) {

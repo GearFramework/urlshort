@@ -14,6 +14,7 @@ const (
 	defaultDatabaseDSN = ""
 )
 
+// ServiceConfig struct of application config
 type ServiceConfig struct {
 	Addr            string
 	ShortURLHost    string
@@ -22,6 +23,7 @@ type ServiceConfig struct {
 	DatabaseDSN     string
 }
 
+// GetConfig create and return application config
 func GetConfig() *ServiceConfig {
 	conf := ParseFlags()
 	if envAddr := os.Getenv("SERVER_ADDRESS"); envAddr != "" {

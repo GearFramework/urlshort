@@ -6,6 +6,7 @@ import (
 	"os"
 )
 
+// ParseFlags parse command line flags to application config
 func ParseFlags() *ServiceConfig {
 	var conf ServiceConfig
 	fmt.Printf("Service started with flags: %v\n", os.Args[1:])
