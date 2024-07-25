@@ -6,13 +6,6 @@ import (
 	"github.com/GearFramework/urlshort/internal/pkg/auth"
 )
 
-// ExampleGetID example of generated unique user ID
-func ExampleGetID() {
-	gen := app.UserGenID{}
-	userID := gen.GetID()
-	fmt.Println(userID)
-}
-
 // ExampleBuildJWT example create token by user ID
 func ExampleBuildJWT() {
 	gen := app.UserGenID{}
