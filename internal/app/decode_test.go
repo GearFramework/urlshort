@@ -2,10 +2,11 @@ package app
 
 import (
 	"context"
-	"github.com/GearFramework/urlshort/internal/config"
-	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
+
+	"github.com/GearFramework/urlshort/internal/config"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestDecodeURL(t *testing.T) {

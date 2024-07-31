@@ -4,12 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/GearFramework/urlshort/internal/pkg"
-	"github.com/GearFramework/urlshort/internal/pkg/logger"
 	"io"
 	"log"
 	"os"
 	"sync"
+
+	"github.com/GearFramework/urlshort/internal/pkg"
+	"github.com/GearFramework/urlshort/internal/pkg/logger"
 )
 
 // Codes storage struct of urls

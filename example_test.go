@@ -2,6 +2,7 @@ package urlshort
 
 import (
 	"fmt"
+
 	"github.com/GearFramework/urlshort/internal/app"
 	"github.com/GearFramework/urlshort/internal/pkg/auth"
 )

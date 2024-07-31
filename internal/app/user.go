@@ -2,9 +2,10 @@ package app
 
 import (
 	"context"
+	"sync"
+
 	"github.com/GearFramework/urlshort/internal/pkg"
 	"github.com/GearFramework/urlshort/internal/pkg/logger"
-	"sync"
 )
 
 // UserGenID generator user ID

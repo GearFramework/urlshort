@@ -3,11 +3,12 @@ package compresser
 import (
 	"compress/gzip"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"io"
 	"net/http"
 	"strings"
 	"sync"
+
+	"github.com/gin-gonic/gin"
 )
 
 type compressHandler struct {

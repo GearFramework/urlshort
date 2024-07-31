@@ -3,9 +3,10 @@ package app
 import (
 	"context"
 	"fmt"
+	"runtime"
+
 	"github.com/GearFramework/urlshort/internal/pkg"
 	"github.com/GearFramework/urlshort/internal/pkg/logger"
-	"runtime"
 )
 
 const (

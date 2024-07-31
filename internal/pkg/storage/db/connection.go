@@ -2,11 +2,12 @@ package db
 
 import (
 	"context"
+	"log"
+
 	"github.com/GearFramework/urlshort/internal/pkg/logger"
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/stdlib"
 	"github.com/jmoiron/sqlx"
-	"log"
 )
 
 // Connector interafce of connector

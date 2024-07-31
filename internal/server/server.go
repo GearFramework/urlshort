@@ -1,12 +1,13 @@
 package server
 
 import (
+	"net/http"
+
 	"github.com/GearFramework/urlshort/internal/config"
 	"github.com/GearFramework/urlshort/internal/pkg"
 	"github.com/GearFramework/urlshort/internal/pkg/logger"
 	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 // Server http-server

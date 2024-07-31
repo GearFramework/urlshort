@@ -1,11 +1,12 @@
 package handlers
 
 import (
+	"net/http"
+
 	"github.com/GearFramework/urlshort/internal/app"
 	"github.com/GearFramework/urlshort/internal/pkg"
 	"github.com/GearFramework/urlshort/internal/pkg/logger"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 // DecodeURL return url by short code

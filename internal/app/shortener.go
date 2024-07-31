@@ -4,6 +4,11 @@ package app
 import (
 	"context"
 	"errors"
+	"io"
+	"log"
+	"math/rand"
+	"time"
+
 	"github.com/GearFramework/urlshort/internal/config"
 	"github.com/GearFramework/urlshort/internal/pkg"
 	"github.com/GearFramework/urlshort/internal/pkg/auth"
@@ -11,10 +16,6 @@ import (
 	"github.com/GearFramework/urlshort/internal/pkg/storage/db"
 	"github.com/GearFramework/urlshort/internal/pkg/storage/file"
 	"github.com/GearFramework/urlshort/internal/pkg/storage/mem"
-	"io"
-	"log"
-	"math/rand"
-	"time"
 )
 
 // ShortApp struct of application

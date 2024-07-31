@@ -3,13 +3,14 @@ package server
 import (
 	"errors"
 	"fmt"
+	"net/http"
+	"time"
+
 	"github.com/GearFramework/urlshort/internal/pkg"
 	"github.com/GearFramework/urlshort/internal/pkg/auth"
 	"github.com/GearFramework/urlshort/internal/pkg/compresser"
 	"github.com/GearFramework/urlshort/internal/pkg/logger"
 	"github.com/gin-gonic/gin"
-	"net/http"
-	"time"
 )
 
 func (s *Server) logger() gin.HandlerFunc {

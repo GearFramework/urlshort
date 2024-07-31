@@ -1,8 +1,9 @@
 package compresser
 
 import (
-	"github.com/gin-gonic/gin"
 	"io"
+
+	"github.com/gin-gonic/gin"
 )
 
 // Compressor middleware compressor

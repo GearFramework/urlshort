@@ -2,13 +2,14 @@ package handlers
 
 import (
 	"encoding/json"
-	"github.com/GearFramework/urlshort/internal/pkg"
-	"github.com/GearFramework/urlshort/internal/pkg/logger"
-	"github.com/gin-gonic/gin"
 	"io"
 	"net/http"
 	neturl "net/url"
 	"strings"
+
+	"github.com/GearFramework/urlshort/internal/pkg"
+	"github.com/GearFramework/urlshort/internal/pkg/logger"
+	"github.com/gin-gonic/gin"
 )
 
 // EncodeURL return short url for requested url

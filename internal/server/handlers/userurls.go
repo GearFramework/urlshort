@@ -2,11 +2,12 @@ package handlers
 
 import (
 	"encoding/json"
+	"net/http"
+	"strings"
+
 	"github.com/GearFramework/urlshort/internal/pkg"
 	"github.com/GearFramework/urlshort/internal/pkg/logger"
 	"github.com/gin-gonic/gin"
-	"net/http"
-	"strings"
 )
 
 // GetUserURLs handler of request on get all saved urls by user

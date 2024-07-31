@@ -1,11 +1,12 @@
 package server
 
 import (
+	"testing"
+
 	"github.com/GearFramework/urlshort/internal/app"
 	"github.com/GearFramework/urlshort/internal/config"
 	"github.com/GearFramework/urlshort/internal/pkg/logger"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestServer(t *testing.T) {

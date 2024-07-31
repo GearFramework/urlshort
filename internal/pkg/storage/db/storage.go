@@ -4,11 +4,12 @@ package db
 import (
 	"context"
 	"database/sql"
+	"sync"
+	"time"
+
 	"github.com/GearFramework/urlshort/internal/pkg"
 	"github.com/GearFramework/urlshort/internal/pkg/logger"
 	"github.com/jmoiron/sqlx"
-	"sync"
-	"time"
 )
 
 // Storage data storage in DB

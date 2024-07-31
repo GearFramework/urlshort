@@ -1,10 +1,11 @@
 package app
 
 import (
+	"testing"
+
 	"github.com/GearFramework/urlshort/internal/config"
 	"github.com/GearFramework/urlshort/internal/pkg/logger"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestShortener(t *testing.T) {

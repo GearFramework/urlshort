@@ -1,9 +1,10 @@
 package auth
 
 import (
+	"testing"
+
 	"github.com/GearFramework/urlshort/internal/pkg/logger"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestUser(t *testing.T) {

@@ -2,8 +2,9 @@ package mem
 
 import (
 	"context"
-	"github.com/GearFramework/urlshort/internal/pkg"
 	"sync"
+
+	"github.com/GearFramework/urlshort/internal/pkg"
 )
 
 type mapCodes map[string]Codes

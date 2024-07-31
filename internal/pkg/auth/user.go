@@ -3,9 +3,10 @@ package auth
 import (
 	"errors"
 	"fmt"
+	"time"
+
 	"github.com/GearFramework/urlshort/internal/pkg/logger"
 	"github.com/golang-jwt/jwt/v4"
-	"time"
 )
 
 // user authorizations settings
