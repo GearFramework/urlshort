@@ -1,14 +1,16 @@
 package server
 
 import (
+	"errors"
 	"fmt"
+	"net/http"
+	"time"
+
 	"github.com/GearFramework/urlshort/internal/pkg"
 	"github.com/GearFramework/urlshort/internal/pkg/auth"
 	"github.com/GearFramework/urlshort/internal/pkg/compresser"
 	"github.com/GearFramework/urlshort/internal/pkg/logger"
 	"github.com/gin-gonic/gin"
-	"net/http"
-	"time"
 )
 
 func (s *Server) logger() gin.HandlerFunc {
@@ -30,6 +32,7 @@ func (s *Server) compress() gin.HandlerFunc {
 	return compresser.NewCompressor()
 }
 
+// CookieParamName authorization param name in cookie
 const CookieParamName = "Authorization"
 
 func (s *Server) auth() gin.HandlerFunc {
@@ -50,6 +53,10 @@ func (s *Server) auth() gin.HandlerFunc {
 		// пытаемся из токена получить userID
 		logger.Log.Infof("token in cookie: %s", c.Value)
 		if userID, err = s.AuthFromToken(ctx, c.Value); err != nil {
+			if errors.Is(err, auth.ErrInvalidAuthorization) {
+				ctx.AbortWithStatus(http.StatusUnauthorized)
+				return
+			}
 			ctx.AbortWithStatus(http.StatusInternalServerError)
 			return
 		}
@@ -59,6 +66,7 @@ func (s *Server) auth() gin.HandlerFunc {
 	}
 }
 
+// AuthNewUser register new user
 func (s *Server) AuthNewUser(ctx *gin.Context) (int, error) {
 	userID, token, err := s.api.CreateToken()
 	if err != nil {
@@ -70,13 +78,13 @@ func (s *Server) AuthNewUser(ctx *gin.Context) (int, error) {
 	return userID, nil
 }
 
+// AuthFromToken authorize user from jwt
 func (s *Server) AuthFromToken(ctx *gin.Context, token string) (int, error) {
 	userID, err := s.api.Auth(token)
-	if err != nil && err == auth.ErrInvalidAuthorization {
-		ctx.AbortWithStatus(http.StatusUnauthorized)
+	if err != nil && errors.Is(err, auth.ErrInvalidAuthorization) {
 		return 0, err
 	}
-	if err != nil && err == auth.ErrNeedAuthorization {
+	if err != nil && errors.Is(err, auth.ErrNeedAuthorization) {
 		return s.AuthNewUser(ctx)
 	}
 	return userID, err

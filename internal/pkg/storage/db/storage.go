@@ -1,26 +1,31 @@
+// Package db provides access to storing short urls in the database
 package db
 
 import (
 	"context"
 	"database/sql"
+	"sync"
+	"time"
+
 	"github.com/GearFramework/urlshort/internal/pkg"
 	"github.com/GearFramework/urlshort/internal/pkg/logger"
 	"github.com/jmoiron/sqlx"
-	"sync"
-	"time"
 )
 
+// Storage data storage in DB
 type Storage struct {
 	sync.RWMutex
 	connection *StorageConnection
 }
 
+// NewStorage make and return urls storage in DB
 func NewStorage(config *StorageConfig) *Storage {
 	return &Storage{
 		connection: NewConnection(config),
 	}
 }
 
+// InitStorage initialize DB storage, make schema and table if not exists
 func (s *Storage) InitStorage() error {
 	if err := s.connection.Open(); err != nil {
 		return err
@@ -49,10 +54,12 @@ func (s *Storage) InitStorage() error {
 	return err
 }
 
+// Close connection with storage
 func (s *Storage) Close() {
 	s.connection.Close()
 }
 
+// GetCode return short code by url from storage
 func (s *Storage) GetCode(ctx context.Context, url string) (string, bool) {
 	var code string
 	err := s.connection.DB.GetContext(ctx, &code, `
@@ -63,6 +70,7 @@ func (s *Storage) GetCode(ctx context.Context, url string) (string, bool) {
 	return code, err == nil
 }
 
+// GetCodeBatch return map of shortly codes by slice urls
 func (s *Storage) GetCodeBatch(ctx context.Context, batch []string) map[string]string {
 	codes := map[string]string{}
 	q, args, err := sqlx.In(`
@@ -95,6 +103,7 @@ func (s *Storage) GetCodeBatch(ctx context.Context, batch []string) map[string]s
 	return codes
 }
 
+// GetURL return full url by short code
 func (s *Storage) GetURL(ctx context.Context, code string) (pkg.ShortURL, bool) {
 	var url pkg.ShortURL
 	err := s.connection.DB.GetContext(ctx, &url, `
@@ -105,6 +114,7 @@ func (s *Storage) GetURL(ctx context.Context, code string) (pkg.ShortURL, bool) 
 	return url, err == nil
 }
 
+// GetMaxUserID return last user ID
 func (s *Storage) GetMaxUserID(ctx context.Context) (int, error) {
 	var maxUserID int
 	err := s.connection.DB.GetContext(ctx, &maxUserID, `
@@ -119,6 +129,7 @@ func (s *Storage) GetMaxUserID(ctx context.Context) (int, error) {
 	return maxUserID, err
 }
 
+// GetUserURLs return slice urls by user ID
 func (s *Storage) GetUserURLs(ctx context.Context, userID int) []pkg.UserURL {
 	userURLs := []pkg.UserURL{}
 	rows, err := s.connection.DB.QueryContext(ctx, `
@@ -145,6 +156,7 @@ func (s *Storage) GetUserURLs(ctx context.Context, userID int) []pkg.UserURL {
 	return userURLs
 }
 
+// Insert new url code and owner user ID
 func (s *Storage) Insert(ctx context.Context, userID int, url, code string) error {
 	_, err := s.connection.DB.ExecContext(ctx, `
 		INSERT INTO urls.shortly (url, code, user_id) 
@@ -153,12 +165,19 @@ func (s *Storage) Insert(ctx context.Context, userID int, url, code string) erro
 	return err
 }
 
+// InsertBatch batch insert code url and owner user ID
 func (s *Storage) InsertBatch(ctx context.Context, userID int, batch [][]string) error {
 	var err error
 	tx, err := s.connection.DB.BeginTx(ctx, &sql.TxOptions{})
 	if err != nil {
 		return err
 	}
+	defer func() {
+		if err != nil {
+			err = tx.Rollback()
+			logger.Log.Error(err.Error())
+		}
+	}()
 	stmt, err := tx.PrepareContext(ctx, `
 		INSERT INTO urls.shortly (url, code, user_id) 
 		VALUES ($1, $2, $3)
@@ -178,6 +197,7 @@ func (s *Storage) InsertBatch(ctx context.Context, userID int, batch [][]string)
 	return tx.Commit()
 }
 
+// DeleteBatch batch delete use urls by slice short code
 func (s *Storage) DeleteBatch(ctx context.Context, userID int, batch []string) {
 	q, args, err := sqlx.In(`
 		UPDATE urls.shortly
@@ -198,6 +218,7 @@ func (s *Storage) DeleteBatch(ctx context.Context, userID int, batch []string) {
 	logger.Log.Infof("well done mark short urls %v as delete", batch)
 }
 
+// Count return total count stored shortly urls
 func (s *Storage) Count() int {
 	var count int
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -212,6 +233,7 @@ func (s *Storage) Count() int {
 	return count
 }
 
+// Truncate clear all stored shortly urls
 func (s *Storage) Truncate() error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -224,6 +246,7 @@ func (s *Storage) Truncate() error {
 	return nil
 }
 
+// Ping check connect with storage
 func (s *Storage) Ping() error {
 	return s.connection.Ping()
 }

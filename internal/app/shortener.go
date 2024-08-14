@@ -1,8 +1,14 @@
+// Package app for generating short urls
 package app
 
 import (
 	"context"
 	"errors"
+	"io"
+	"log"
+	"math/rand"
+	"time"
+
 	"github.com/GearFramework/urlshort/internal/config"
 	"github.com/GearFramework/urlshort/internal/pkg"
 	"github.com/GearFramework/urlshort/internal/pkg/auth"
@@ -10,12 +16,9 @@ import (
 	"github.com/GearFramework/urlshort/internal/pkg/storage/db"
 	"github.com/GearFramework/urlshort/internal/pkg/storage/file"
 	"github.com/GearFramework/urlshort/internal/pkg/storage/mem"
-	"io"
-	"log"
-	"math/rand"
-	"time"
 )
 
+// ShortApp struct of application
 type ShortApp struct {
 	Conf         *config.ServiceConfig
 	Store        pkg.Storable
@@ -23,6 +26,7 @@ type ShortApp struct {
 	flushCounter int
 }
 
+// NewShortener make and return short urls application
 func NewShortener(conf *config.ServiceConfig) (*ShortApp, error) {
 	shortener := ShortApp{
 		Conf: conf,
@@ -84,32 +88,38 @@ func (app *ShortApp) isValidStorage(store pkg.Storable) error {
 	return store.Ping()
 }
 
+// Auth process authorization of user, return user ID, error if not authorised
 func (app *ShortApp) Auth(token string) (int, error) {
 	userID := auth.GetUserIDFromJWT(token)
 	if userID == -1 {
 		return userID, auth.ErrNeedAuthorization
-	} else if userID == 0 {
+	}
+	if userID == 0 {
 		return userID, auth.ErrInvalidAuthorization
 	}
 	return userID, nil
 }
 
+// CreateToken make access token for authorized user
 func (app *ShortApp) CreateToken() (int, string, error) {
 	userID := app.GenerateUserID()
 	token, err := auth.BuildJWT(userID)
 	return userID, token, err
 }
 
+// GenerateUserID make unique user ID
 func (app *ShortApp) GenerateUserID() int {
 	return app.GenID.GetID()
 }
 
+// AddShortly save url and short code in storage
 func (app *ShortApp) AddShortly(ctx context.Context, userID int, url, code string) {
 	if err := app.Store.Insert(ctx, userID, url, code); err != nil {
 		logger.Log.Error(err.Error())
 	}
 }
 
+// ClearShortly delete all short urls in storage
 func (app *ShortApp) ClearShortly() {
 	if err := app.Store.Truncate(); err != nil {
 		logger.Log.Error(err.Error())
@@ -125,6 +135,7 @@ func (app *ShortApp) getRandomString(length int) string {
 	return string(b)
 }
 
+// StopApp running when application shut down
 func (app *ShortApp) StopApp() {
 	app.Store.Close()
 }

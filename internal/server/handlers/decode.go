@@ -1,13 +1,15 @@
 package handlers
 
 import (
+	"net/http"
+
 	"github.com/GearFramework/urlshort/internal/app"
 	"github.com/GearFramework/urlshort/internal/pkg"
 	"github.com/GearFramework/urlshort/internal/pkg/logger"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
+// DecodeURL return url by short code
 func DecodeURL(ctx *gin.Context, api pkg.APIShortener) {
 	code := ctx.Param("code")
 	url, err := api.DecodeURL(ctx, code)

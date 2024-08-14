@@ -2,15 +2,17 @@ package handlers
 
 import (
 	"encoding/json"
-	"github.com/GearFramework/urlshort/internal/pkg"
-	"github.com/GearFramework/urlshort/internal/pkg/logger"
-	"github.com/gin-gonic/gin"
 	"io"
 	"net/http"
 	neturl "net/url"
 	"strings"
+
+	"github.com/GearFramework/urlshort/internal/pkg"
+	"github.com/GearFramework/urlshort/internal/pkg/logger"
+	"github.com/gin-gonic/gin"
 )
 
+// EncodeURL return short url for requested url
 func EncodeURL(ctx *gin.Context, api pkg.APIShortener) {
 	body, err := io.ReadAll(ctx.Request.Body)
 	defer ctx.Request.Body.Close()
@@ -39,18 +41,23 @@ func EncodeURL(ctx *gin.Context, api pkg.APIShortener) {
 	ctx.Data(status, "text/plain", []byte(shortURL))
 }
 
+// RequestJSON request struct for handler EncodeURLFromJSON
 type RequestJSON struct {
 	URL string `json:"url"`
 }
 
-type RequestBatchJSON pkg.BatchURLs
-
+// ResponseJSON response on request RequestJSON
 type ResponseJSON struct {
 	Result string `json:"result"`
 }
 
+// RequestBatchJSON request struct for handler BatchEncodeURLs
+type RequestBatchJSON pkg.BatchURLs
+
+// ResponseBatchJSON response on request RequestBatchJSON
 type ResponseBatchJSON pkg.ResultBatchShort
 
+// EncodeURLFromJSON return short url for url in json content type request
 func EncodeURLFromJSON(ctx *gin.Context, api pkg.APIShortener) {
 	if !strings.Contains(ctx.Request.Header.Get("Content-Type"), "application/json") {
 		logger.Log.Errorf(
@@ -79,6 +86,7 @@ func EncodeURLFromJSON(ctx *gin.Context, api pkg.APIShortener) {
 	ctx.JSON(status, resp)
 }
 
+// BatchEncodeURLs return short urls for urls in batch json content type request
 func BatchEncodeURLs(ctx *gin.Context, api pkg.APIShortener) {
 	if !strings.Contains(ctx.Request.Header.Get("Content-Type"), "application/json") {
 		logger.Log.Errorf(

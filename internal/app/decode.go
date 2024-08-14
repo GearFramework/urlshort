@@ -5,8 +5,10 @@ import (
 	"errors"
 )
 
+// ErrShortURLIsDeleted error if short url is deleted
 var ErrShortURLIsDeleted = errors.New("short url is deleted")
 
+// DecodeURL application api for return original url by code
 func (app *ShortApp) DecodeURL(ctx context.Context, code string) (string, error) {
 	app.Store.Lock()
 	defer app.Store.Unlock()

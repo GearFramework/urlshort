@@ -3,11 +3,12 @@ package compresser
 import (
 	"compress/gzip"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"io"
 	"net/http"
 	"strings"
 	"sync"
+
+	"github.com/gin-gonic/gin"
 )
 
 type compressHandler struct {
@@ -29,6 +30,7 @@ func newCompressHandler() *compressHandler {
 	return handler
 }
 
+// Handle handler of compress
 func (c *compressHandler) Handle(ctx *gin.Context) {
 	if ctx.Request.Header.Get("Content-Encoding") == "gzip" {
 		c.DecompressHandle(ctx)
@@ -52,6 +54,7 @@ func (c *compressHandler) Handle(ctx *gin.Context) {
 	ctx.Next()
 }
 
+// DecompressHandle handler of decompress
 func (c *compressHandler) DecompressHandle(ctx *gin.Context) {
 	if ctx.Request.Body == nil {
 		return

@@ -1,11 +1,12 @@
 package server
 
 import (
+	"testing"
+
 	"github.com/GearFramework/urlshort/internal/app"
 	"github.com/GearFramework/urlshort/internal/config"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 var a *app.ShortApp

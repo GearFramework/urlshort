@@ -5,31 +5,38 @@ import (
 	"sync"
 )
 
+// User params names
 const (
+	// UserIDParamName param name for access in cookie
 	UserIDParamName = "userID"
 )
 
+// BatchURLs struct of batch urls
 type BatchURLs struct {
 	CorrelationID string `json:"correlation_id"`
 	OriginalURL   string `json:"original_url"`
 }
 
+// ResultBatchShort struct of result batch urls
 type ResultBatchShort struct {
 	CorrelationID string `json:"correlation_id"`
 	ShortURL      string `json:"short_url"`
 }
 
+// UserURL struct of user url
 type UserURL struct {
 	Code     string `json:"-"`
 	ShortURL string `json:"short_url"`
 	URL      string `json:"original_url"`
 }
 
+// ShortURL struct of state url
 type ShortURL struct {
 	URL       string `db:"url"`
 	IsDeleted bool   `db:"is_deleted"`
 }
 
+// APIShortener interface of applications shortener urls
 type APIShortener interface {
 	Auth(token string) (int, error)
 	GenerateUserID() int
@@ -43,6 +50,7 @@ type APIShortener interface {
 	GetShortURL(code string) string
 }
 
+// Storable interface of storage urls
 type Storable interface {
 	sync.Locker
 	InitStorage() error
@@ -60,6 +68,7 @@ type Storable interface {
 	Close()
 }
 
+// GeneratorID interface of generators user ID
 type GeneratorID interface {
 	GetID() int
 }

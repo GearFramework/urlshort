@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// InitRoutes initialize routes of application Shortener
 func (s *Server) InitRoutes() {
 	s.Router.POST("/", func(ctx *gin.Context) { handlers.EncodeURL(ctx, s.api) })
 	s.Router.GET("/:code", func(ctx *gin.Context) { handlers.DecodeURL(ctx, s.api) })

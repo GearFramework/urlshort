@@ -1,12 +1,15 @@
 package logger
 
 import (
-	"go.uber.org/zap"
 	"time"
+
+	"go.uber.org/zap"
 )
 
+// Log global variable of logger
 var Log *zap.SugaredLogger
 
+// Initialize logger
 func Initialize(level string) error {
 	lvl, err := zap.ParseAtomicLevel(level)
 	if err != nil {
@@ -22,6 +25,7 @@ func Initialize(level string) error {
 	return nil
 }
 
+// GetDurationInMilliseconds return duration in milliseconds between start and now
 func GetDurationInMilliseconds(start time.Time) float64 {
 	end := time.Now()
 	duration := end.Sub(start)

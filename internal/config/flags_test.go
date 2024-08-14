@@ -2,10 +2,11 @@ package config
 
 import (
 	"flag"
-	"github.com/stretchr/testify/assert"
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestParseFlags(t *testing.T) {
