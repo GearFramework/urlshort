@@ -12,10 +12,6 @@ import (
 	"github.com/GearFramework/urlshort/internal/server"
 )
 
-func Exit() bool {
-	return false
-}
-
 func main() {
 	if err := run(); err != nil {
 		log.Fatal(err.Error())
