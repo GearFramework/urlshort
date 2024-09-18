@@ -15,6 +15,7 @@ func ParseFlags() *ServiceConfig {
 	flag.StringVar(&conf.LoggerLevel, "l", defaultLevel, "logger level")
 	flag.StringVar(&conf.StorageFilePath, "f", defaultStoragePath, "short url storage path")
 	flag.StringVar(&conf.DatabaseDSN, "d", defaultDatabaseDSN, "database connection DSN")
+	flag.BoolVar(&conf.EnableHTTPS, "s", defaultEnableHTTPS, "enable HTTPS support")
 	flag.Parse()
 	return &conf
 }

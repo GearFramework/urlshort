@@ -12,6 +12,7 @@ const (
 	defaultStoragePath = ""
 	//defaultDatabaseDSN = "postgres://pgadmin:159753@localhost:5432/urlshortly"
 	defaultDatabaseDSN = ""
+	defaultEnableHTTPS = false
 )
 
 // ServiceConfig struct of application config
@@ -21,6 +22,7 @@ type ServiceConfig struct {
 	LoggerLevel     string
 	StorageFilePath string
 	DatabaseDSN     string
+	EnableHTTPS     bool
 }
 
 // GetConfig create and return application config
@@ -40,6 +42,9 @@ func GetConfig() *ServiceConfig {
 	}
 	if envDatabaseDSN := os.Getenv("DATABASE_DSN"); envDatabaseDSN != "" {
 		conf.DatabaseDSN = envDatabaseDSN
+	}
+	if envEnableHTTPS := os.Getenv("ENABLE_HTTPS"); envEnableHTTPS != "" {
+		conf.EnableHTTPS = true
 	}
 	return conf
 }
