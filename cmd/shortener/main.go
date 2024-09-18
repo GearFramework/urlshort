@@ -13,8 +13,6 @@ import (
 	"github.com/GearFramework/urlshort/internal/server"
 )
 
-type Build string
-
 var (
 	buildVersion string
 	buildDate    string
