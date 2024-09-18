@@ -1,6 +1,6 @@
 module github.com/GearFramework/urlshort
 
-go 1.22
+go 1.22.0
 
 require (
 	github.com/gin-contrib/pprof v1.5.0
