@@ -73,6 +73,7 @@ func GetConfig() *ServiceConfig {
 	if envEnableHTTPS := os.Getenv("ENABLE_HTTPS"); envEnableHTTPS != "" {
 		conf.EnableHTTPS = true
 	}
+	fmt.Println("Use config: ", conf)
 	return conf
 }
 
