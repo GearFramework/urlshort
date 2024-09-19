@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	_ "net/http/pprof"
 	"os"
@@ -12,7 +13,29 @@ import (
 	"github.com/GearFramework/urlshort/internal/server"
 )
 
+var (
+	buildVersion string
+	buildDate    string
+	buildCommit  string
+)
+
+func stringBuild(b string) string {
+	if b == "" {
+		return "N/A"
+	}
+	return b
+}
+
+func printGreeting() {
+	fmt.Printf("Build version: %s\nBuild date: %s\nBuild commit: %s\n",
+		stringBuild(buildVersion),
+		stringBuild(buildDate),
+		stringBuild(buildCommit),
+	)
+}
+
 func main() {
+	printGreeting()
 	if err := run(); err != nil {
 		log.Fatal(err.Error())
 	}

@@ -20,10 +20,9 @@ import (
 
 // ShortApp struct of application
 type ShortApp struct {
-	Conf         *config.ServiceConfig
-	Store        pkg.Storable
-	GenID        *UserGenID
-	flushCounter int
+	Conf  *config.ServiceConfig
+	Store pkg.Storable
+	GenID *UserGenID
 }
 
 // NewShortener make and return short urls application
