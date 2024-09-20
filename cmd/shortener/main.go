@@ -64,6 +64,7 @@ func gracefulStop(stopCallback func()) {
 		gracefulStopChan,
 		syscall.SIGTERM,
 		syscall.SIGINT,
+		syscall.SIGQUIT,
 	)
 	go func() {
 		sig := <-gracefulStopChan
