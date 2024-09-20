@@ -6,6 +6,7 @@ import (
 	"os"
 )
 
+// ShortlyFlags struct of command-line flags
 type ShortlyFlags struct {
 	Addr,
 	ShortURLHost,
@@ -31,16 +32,4 @@ func ParseFlags() *ShortlyFlags {
 	flag.Parse()
 	fmt.Println("Config from flags: ", fl)
 	return &fl
-}
-
-func GetConfigFile() string {
-	var confFile string
-	flag.StringVar(&confFile, "c", defaultConfigFile, "use config file")
-	flag.Parse()
-	fmt.Println("Config file: ", confFile)
-	if confFile != "" {
-		return confFile
-	}
-	flag.StringVar(&confFile, "config", defaultConfigFile, "use config file")
-	return confFile
 }
