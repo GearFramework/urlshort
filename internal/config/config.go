@@ -53,8 +53,48 @@ func GetConfig() *ServiceConfig {
 		if err := loadConfigFile(fl.ConfigFile, conf); err != nil {
 			fmt.Printf("Error loading config file: %s\n", err)
 		}
-		fmt.Println(conf)
+		fmt.Println("Config from file: ", conf)
 	}
+	mappingFlagsToConfig(fl, conf)
+	fmt.Println("Config after mapping: ", conf)
+	mappingEnvToConfig(conf)
+	fmt.Println("Use config: ", conf)
+	return conf
+}
+
+func loadConfigFile(filepath string, fl *ServiceConfig) error {
+	b, err := os.ReadFile(filepath)
+	if err != nil {
+		return err
+	}
+	if err := json.Unmarshal(b, &fl); err != nil {
+		return err
+	}
+	return nil
+}
+
+func mappingFlagsToConfig(fl *ShortlyFlags, conf *ServiceConfig) {
+	if fl.Addr != "" {
+		conf.Addr = fl.Addr
+	}
+	if fl.ShortURLHost != "" {
+		conf.ShortURLHost = fl.ShortURLHost
+	}
+	if fl.LogLevel != "" {
+		conf.LoggerLevel = fl.LogLevel
+	}
+	if fl.StorageFilePath != "" {
+		conf.StorageFilePath = fl.StorageFilePath
+	}
+	if fl.DatabaseDSN != "" {
+		conf.DatabaseDSN = fl.DatabaseDSN
+	}
+	if fl.EnableHTTPS {
+		conf.EnableHTTPS = fl.EnableHTTPS
+	}
+}
+
+func mappingEnvToConfig(conf *ServiceConfig) {
 	if envAddr := os.Getenv("SERVER_ADDRESS"); envAddr != "" {
 		conf.Addr = envAddr
 	}
@@ -73,17 +113,4 @@ func GetConfig() *ServiceConfig {
 	if envEnableHTTPS := os.Getenv("ENABLE_HTTPS"); envEnableHTTPS != "" {
 		conf.EnableHTTPS = true
 	}
-	fmt.Println("Use config: ", conf)
-	return conf
-}
-
-func loadConfigFile(filepath string, conf *ServiceConfig) error {
-	b, err := os.ReadFile(filepath)
-	if err != nil {
-		return err
-	}
-	if err := json.Unmarshal(b, &conf); err != nil {
-		return err
-	}
-	return nil
 }
