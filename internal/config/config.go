@@ -16,6 +16,7 @@ const (
 	defaultDatabaseDSN = ""
 	defaultEnableHTTPS = false
 	defaultConfigFile  = ""
+	defaultTrustedSubnet
 )
 
 // ServiceConfig struct of application config
@@ -25,6 +26,7 @@ type ServiceConfig struct {
 	LoggerLevel     string
 	StorageFilePath string `json:"file_storage_path"`
 	DatabaseDSN     string `json:"database_dsn"`
+	TrustedSubnet   string `json:"trusted_subnet"`
 	EnableHTTPS     bool   `json:"enable_https"`
 	ConfigFile      string
 }
@@ -38,6 +40,7 @@ func NewConfig() *ServiceConfig {
 		StorageFilePath: defaultStoragePath,
 		DatabaseDSN:     defaultDatabaseDSN,
 		EnableHTTPS:     defaultEnableHTTPS,
+		TrustedSubnet:   defaultTrustedSubnet,
 	}
 }
 
@@ -89,6 +92,9 @@ func mappingFlagsToConfig(fl *ShortlyFlags, conf *ServiceConfig) {
 	if fl.DatabaseDSN != "" {
 		conf.DatabaseDSN = fl.DatabaseDSN
 	}
+	if fl.TrustedSubnet != "" {
+		conf.TrustedSubnet = fl.TrustedSubnet
+	}
 	if fl.EnableHTTPS {
 		conf.EnableHTTPS = fl.EnableHTTPS
 	}
@@ -112,5 +118,8 @@ func mappingEnvToConfig(conf *ServiceConfig) {
 	}
 	if envEnableHTTPS := os.Getenv("ENABLE_HTTPS"); envEnableHTTPS != "" {
 		conf.EnableHTTPS = true
+	}
+	if envTrustedSubnet := os.Getenv("TRUSTED_SUBNET"); envTrustedSubnet != "" {
+		conf.TrustedSubnet = envTrustedSubnet
 	}
 }

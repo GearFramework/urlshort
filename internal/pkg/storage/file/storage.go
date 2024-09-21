@@ -55,7 +55,11 @@ func (s *Storage) loadShortlyURLs() error {
 	if err != nil {
 		return err
 	}
-	defer file.Close()
+	defer func() {
+		if errClose := file.Close(); errClose != nil {
+			log.Println(err.Error())
+		}
+	}()
 	if err = json.NewDecoder(file).Decode(&s.codeByURL); err != nil {
 		return err
 	}
@@ -66,7 +70,7 @@ func (s *Storage) loadShortlyURLs() error {
 			lastUserID = data.UserID
 		}
 	}
-	s.flushCounter = s.Count() + s.Config.FlushPerItems
+	s.flushCounter = s.Count(context.Background()) + s.Config.FlushPerItems
 	return nil
 }
 
@@ -129,7 +133,7 @@ func (s *Storage) Insert(ctx context.Context, userID int, url, code string) erro
 	s.codeByURL[url] = Codes{UserID: userID, Code: code}
 	s.urlByCode[code] = url
 	var err error
-	if s.mustFlush() {
+	if s.mustFlush(ctx) {
 		err = s.flush()
 		s.flushCounter += s.Config.FlushPerItems
 	}
@@ -145,7 +149,7 @@ func (s *Storage) InsertBatch(ctx context.Context, userID int, batch [][]string)
 		s.codeByURL[pack[0]] = Codes{UserID: userID, Code: pack[1]}
 		s.urlByCode[pack[1]] = pack[0]
 	}
-	if s.mustFlush() {
+	if s.mustFlush(ctx) {
 		if err := s.flush(); err != nil {
 			logger.Log.Warn(err.Error())
 		}
@@ -171,12 +175,27 @@ func (s *Storage) DeleteBatch(ctx context.Context, userID int, batch []string) {
 	}
 }
 
-func (s *Storage) mustFlush() bool {
-	return s.Count() == s.flushCounter
+func (s *Storage) mustFlush(ctx context.Context) bool {
+	return s.Count(ctx) == s.flushCounter
+}
+
+// GetUniqueUsers return slice of unique user ID
+func (s *Storage) GetUniqueUsers(ctx context.Context) []int {
+	s.Lock()
+	defer s.Unlock()
+	users := []int{}
+	hash := map[int]int{}
+	for _, code := range s.codeByURL {
+		if _, ok := hash[code.UserID]; !ok {
+			hash[code.UserID] = 1
+			users = append(users, code.UserID)
+		}
+	}
+	return users
 }
 
 // Count return count url in storage
-func (s *Storage) Count() int {
+func (s *Storage) Count(ctx context.Context) int {
 	return len(s.codeByURL)
 }
 

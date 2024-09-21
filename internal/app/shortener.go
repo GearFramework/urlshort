@@ -125,6 +125,14 @@ func (app *ShortApp) ClearShortly() {
 	}
 }
 
+// GetStats return internal statistics about short urls and uers
+func (app *ShortApp) GetStats(ctx context.Context) *pkg.Stats {
+	return &pkg.Stats{
+		URLs:  app.Store.Count(ctx),
+		Users: len(app.Store.GetUniqueUsers(ctx)),
+	}
+}
+
 func (app *ShortApp) getRandomString(length int) string {
 	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
 	b := make([]byte, length)

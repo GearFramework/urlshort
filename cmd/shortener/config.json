@@ -3,5 +3,6 @@
   "base_url": "https://localhost",
   "file_storage_path": "/tmp/urls.json",
   "database_dsn": "",
-  "enable_https": false
+  "enable_https": false,
+  "trusted_subnet": "127.0.0.0/24"
 }
