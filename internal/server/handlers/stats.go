@@ -25,6 +25,7 @@ func GetInternalStats(ctx *gin.Context, api pkg.APIShortener, conf *config.Servi
 	if err := validateUserIP(ctx, conf); err != nil {
 		logger.Log.Errorf("unauthorized access: %s\n", err)
 		ctx.Status(http.StatusForbidden)
+		return
 	}
 	stats := ResponseStats{
 		*api.GetStats(ctx),
