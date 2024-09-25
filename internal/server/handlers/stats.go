@@ -18,6 +18,7 @@ type ResponseStats struct {
 var (
 	errTrustedNetworkNotDefined = errors.New("trusted network not defined")
 	errEmptyXRealIP             = errors.New("empty X-Real-IP header")
+	errIPNotFromTrustedNetwork  = errors.New("IP not from trusted network")
 )
 
 // GetInternalStats return internal statistics about short urls and uers
@@ -43,7 +44,7 @@ func validateUserIP(ctx *gin.Context, conf *config.ServiceConfig) error {
 		return err
 	}
 	if !trustNet.Contains(userIP) {
-		return err
+		return errIPNotFromTrustedNetwork
 	}
 	return nil
 }
