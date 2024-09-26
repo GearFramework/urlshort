@@ -7,15 +7,12 @@ import (
 )
 
 const (
-	defaultAddress  = ":8080"
-	defaultShortURL = "http://localhost:8080"
-	defaultLevel    = "info"
-	//defaultStoragePath = "/tmp/short-url-db.json"
+	defaultAddress     = ":8080"
+	defaultShortURL    = "http://localhost:8080"
+	defaultLevel       = "info"
 	defaultStoragePath = ""
-	//defaultDatabaseDSN = "postgres://pgadmin:159753@localhost:5432/urlshortly"
 	defaultDatabaseDSN = ""
 	defaultEnableHTTPS = false
-	defaultConfigFile  = ""
 )
 
 // ServiceConfig struct of application config
@@ -58,6 +55,7 @@ func GetConfig() *ServiceConfig {
 	mappingFlagsToConfig(fl, conf)
 	fmt.Println("Config after mapping: ", conf)
 	mappingEnvToConfig(conf)
+	checkEmptyConfigParams(conf)
 	fmt.Println("Use config: ", conf)
 	return conf
 }
@@ -112,5 +110,26 @@ func mappingEnvToConfig(conf *ServiceConfig) {
 	}
 	if envEnableHTTPS := os.Getenv("ENABLE_HTTPS"); envEnableHTTPS != "" {
 		conf.EnableHTTPS = true
+	}
+}
+
+func checkEmptyConfigParams(conf *ServiceConfig) {
+	if conf.Addr == "" {
+		conf.Addr = defaultAddress
+	}
+	if conf.ShortURLHost == "" {
+		conf.ShortURLHost = defaultShortURL
+	}
+	if conf.LoggerLevel == "" {
+		conf.LoggerLevel = defaultLevel
+	}
+	if conf.StorageFilePath == "" {
+		conf.StorageFilePath = defaultStoragePath
+	}
+	if conf.DatabaseDSN == "" {
+		conf.DatabaseDSN = defaultDatabaseDSN
+	}
+	if !conf.EnableHTTPS {
+		conf.EnableHTTPS = defaultEnableHTTPS
 	}
 }
