@@ -8,21 +8,6 @@ import (
 
 var empty = "\x00"
 
-type StringValue string
-
-func (v StringValue) String() string {
-	return string(v)
-}
-
-func (v StringValue) Set(s string) error {
-	v = StringValue(s)
-	return nil
-}
-
-func (v StringValue) Isset(s string) bool {
-	return string(v) != empty
-}
-
 // ShortlyFlags struct of command-line flags
 type ShortlyFlags struct {
 	Addr,
@@ -32,14 +17,11 @@ type ShortlyFlags struct {
 	DatabaseDSN,
 	ConfigFile string
 	EnableHTTPS bool
-	Test        StringValue
 }
 
 // ParseFlags parse command line flags to application config
 func ParseFlags() *ShortlyFlags {
 	var fl ShortlyFlags
-	var t StringValue
-	flag.Var(&t, "p", "ssds")
 	fmt.Printf("Service started with flags: %v\n", os.Args[1:])
 	flag.StringVar(&fl.Addr, "a", empty, "address to run server")
 	flag.StringVar(&fl.ShortURLHost, "b", empty, "base address to result short URL")
@@ -50,7 +32,6 @@ func ParseFlags() *ShortlyFlags {
 	flag.StringVar(&fl.ConfigFile, "c", empty, "use config file")
 	flag.StringVar(&fl.ConfigFile, "config", empty, "use config file")
 	flag.Parse()
-	fmt.Println("dddd p", t)
 	fmt.Println("Config from flags: ", fl)
 	return &fl
 }
