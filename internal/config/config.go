@@ -7,12 +7,15 @@ import (
 )
 
 const (
-	defaultAddress     = ":8080"
-	defaultShortURL    = "http://localhost:8080"
-	defaultLevel       = "info"
+	defaultAddress  = ":8080"
+	defaultShortURL = "http://localhost:8080"
+	defaultLevel    = "info"
+	//defaultStoragePath = "/tmp/short-url-db.json"
 	defaultStoragePath = ""
+	//defaultDatabaseDSN = "postgres://pgadmin:159753@localhost:5432/urlshortly"
 	defaultDatabaseDSN = ""
 	defaultEnableHTTPS = false
+	defaultConfigFile  = ""
 )
 
 // ServiceConfig struct of application config
@@ -55,7 +58,6 @@ func GetConfig() *ServiceConfig {
 	mappingFlagsToConfig(fl, conf)
 	fmt.Println("Config after mapping: ", conf)
 	mappingEnvToConfig(conf)
-	checkEmptyConfigParams(conf)
 	fmt.Println("Use config: ", conf)
 	return conf
 }
@@ -72,19 +74,19 @@ func loadConfigFile(filepath string, fl *ServiceConfig) error {
 }
 
 func mappingFlagsToConfig(fl *ShortlyFlags, conf *ServiceConfig) {
-	if fl.Addr != "" {
+	if fl.Addr != empty {
 		conf.Addr = fl.Addr
 	}
-	if fl.ShortURLHost != "" {
-		conf.ShortURLHost = fl.ShortURLHost
+	if fl.ShortURLHost != empty {
+		conf.ShortURLHost = string(fl.ShortURLHost)
 	}
-	if fl.LogLevel != "" {
+	if fl.LogLevel != empty {
 		conf.LoggerLevel = fl.LogLevel
 	}
-	if fl.StorageFilePath != "" {
+	if fl.StorageFilePath != empty {
 		conf.StorageFilePath = fl.StorageFilePath
 	}
-	if fl.DatabaseDSN != "" {
+	if fl.DatabaseDSN != empty {
 		conf.DatabaseDSN = fl.DatabaseDSN
 	}
 	if fl.EnableHTTPS {
@@ -94,7 +96,7 @@ func mappingFlagsToConfig(fl *ShortlyFlags, conf *ServiceConfig) {
 
 func mappingEnvToConfig(conf *ServiceConfig) {
 	if envAddr := os.Getenv("SERVER_ADDRESS"); envAddr != "" {
-		conf.Addr = envAddr
+		conf.Addr = os.Getenv("SERVER_ADDRESS")
 	}
 	if envURLHost := os.Getenv("BASE_URL"); envURLHost != "" {
 		conf.ShortURLHost = envURLHost
@@ -110,26 +112,5 @@ func mappingEnvToConfig(conf *ServiceConfig) {
 	}
 	if envEnableHTTPS := os.Getenv("ENABLE_HTTPS"); envEnableHTTPS != "" {
 		conf.EnableHTTPS = true
-	}
-}
-
-func checkEmptyConfigParams(conf *ServiceConfig) {
-	if conf.Addr == "" {
-		conf.Addr = defaultAddress
-	}
-	if conf.ShortURLHost == "" {
-		conf.ShortURLHost = defaultShortURL
-	}
-	if conf.LoggerLevel == "" {
-		conf.LoggerLevel = defaultLevel
-	}
-	if conf.StorageFilePath == "" {
-		conf.StorageFilePath = defaultStoragePath
-	}
-	if conf.DatabaseDSN == "" {
-		conf.DatabaseDSN = defaultDatabaseDSN
-	}
-	if !conf.EnableHTTPS {
-		conf.EnableHTTPS = defaultEnableHTTPS
 	}
 }
