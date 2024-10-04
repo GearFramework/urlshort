@@ -52,6 +52,9 @@ func run() error {
 		return err
 	}
 	s.InitRoutes()
+	if shortener.Conf.EnableHTTPS {
+		return s.UpTLS()
+	}
 	return s.Up()
 }
 
@@ -61,6 +64,7 @@ func gracefulStop(stopCallback func()) {
 		gracefulStopChan,
 		syscall.SIGTERM,
 		syscall.SIGINT,
+		syscall.SIGQUIT,
 	)
 	go func() {
 		sig := <-gracefulStopChan

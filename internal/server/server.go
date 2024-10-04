@@ -1,6 +1,7 @@
 package server
 
 import (
+	"golang.org/x/crypto/acme/autocert"
 	"net/http"
 
 	"github.com/GearFramework/urlshort/internal/config"
@@ -43,10 +44,33 @@ func (s *Server) Up() error {
 		Addr:    s.Conf.Addr,
 		Handler: s.Router,
 	}
-	logger.Log.Infof("Start server at the %s\n", s.Conf.Addr)
-	err := s.Router.Run(s.Conf.Addr)
-	if err != nil {
-		logger.Log.Infof("Failed to Listen and Serve: %v\n", err)
+	logger.Log.Infof("Start HTTP server at the %s\n", s.Conf.Addr)
+	if err := s.Router.Run(s.Conf.Addr); err != nil {
+		logger.Log.Infof("Failed to Listen and Serve HTTP: %v\n", err)
+		return err
+	}
+	return nil
+}
+
+// UpTLS run server as https
+func (s *Server) UpTLS() error {
+	manager := &autocert.Manager{
+		// директория для хранения сертификатов
+		Cache: autocert.DirCache(".cert"),
+		// функция, принимающая Terms of Service издателя сертификатов
+		Prompt: autocert.AcceptTOS,
+		// перечень доменов, для которых будут поддерживаться сертификаты
+		HostPolicy: autocert.HostWhitelist("localhost"),
+	}
+	s.HTTP = &http.Server{
+		Addr:    s.Conf.Addr,
+		Handler: s.Router,
+		// для TLS-конфигурации используем менеджер сертификатов
+		TLSConfig: manager.TLSConfig(),
+	}
+	logger.Log.Infof("Start HTTPS server at the %s\n", s.Conf.Addr)
+	if err := s.Router.RunTLS(s.Conf.Addr, ".cert/shortener.crt", ".cert/shortener.key"); err != nil {
+		logger.Log.Infof("Failed to Listen and Serve HTTPS: %v\n", err)
 		return err
 	}
 	return nil
