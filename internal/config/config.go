@@ -7,16 +7,13 @@ import (
 )
 
 const (
-	defaultAddress  = ":8080"
-	defaultShortURL = "http://localhost:8080"
-	defaultLevel    = "info"
-	//defaultStoragePath = "/tmp/short-url-db.json"
-	defaultStoragePath = ""
-	//defaultDatabaseDSN = "postgres://pgadmin:159753@localhost:5432/urlshortly"
-	defaultDatabaseDSN = ""
-	defaultEnableHTTPS = false
-	defaultConfigFile  = ""
-	defaultTrustedSubnet
+	defaultAddress       = ":8080"
+	defaultShortURL      = "http://localhost:8080"
+	defaultLevel         = "info"
+	defaultStoragePath   = ""
+	defaultDatabaseDSN   = ""
+	defaultEnableHTTPS   = false
+	defaultTrustedSubnet = ""
 )
 
 // ServiceConfig struct of application config
@@ -77,22 +74,22 @@ func loadConfigFile(filepath string, fl *ServiceConfig) error {
 }
 
 func mappingFlagsToConfig(fl *ShortlyFlags, conf *ServiceConfig) {
-	if fl.Addr != "" {
+	if fl.Addr != empty {
 		conf.Addr = fl.Addr
 	}
-	if fl.ShortURLHost != "" {
+	if fl.ShortURLHost != empty {
 		conf.ShortURLHost = fl.ShortURLHost
 	}
-	if fl.LogLevel != "" {
+	if fl.LogLevel != empty {
 		conf.LoggerLevel = fl.LogLevel
 	}
-	if fl.StorageFilePath != "" {
+	if fl.StorageFilePath != empty {
 		conf.StorageFilePath = fl.StorageFilePath
 	}
-	if fl.DatabaseDSN != "" {
+	if fl.DatabaseDSN != empty {
 		conf.DatabaseDSN = fl.DatabaseDSN
 	}
-	if fl.TrustedSubnet != "" {
+	if fl.TrustedSubnet != empty {
 		conf.TrustedSubnet = fl.TrustedSubnet
 	}
 	if fl.EnableHTTPS {
