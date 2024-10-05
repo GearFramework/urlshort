@@ -250,7 +250,7 @@ func (s *Storage) GetUniqueUsers(ctx context.Context) []int {
 		if err != nil {
 			break
 		}
-		users = append(users)
+		users = append(users, userID)
 	}
 	if err = rows.Err(); err != nil {
 		logger.Log.Warn(err.Error())
