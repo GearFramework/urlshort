@@ -11,6 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// ResponseStats struct of statistic
 type ResponseStats struct {
 	pkg.Stats
 }
