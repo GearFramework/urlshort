@@ -126,8 +126,23 @@ func (s *Storage) DeleteBatch(ctx context.Context, userID int, batch []string) {
 	}
 }
 
+// GetUniqueUsers return slice of unique user ID
+func (s *Storage) GetUniqueUsers(ctx context.Context) []int {
+	s.Lock()
+	defer s.Unlock()
+	users := []int{}
+	hash := map[int]int{}
+	for _, code := range s.codeByURL {
+		if _, ok := hash[code.UserID]; !ok {
+			hash[code.UserID] = 1
+			users = append(users, code.UserID)
+		}
+	}
+	return users
+}
+
 // Count return count url in storage
-func (s *Storage) Count() int {
+func (s *Storage) Count(ctx context.Context) int {
 	return len(s.codeByURL)
 }
 
