@@ -32,7 +32,7 @@ func ParseFlags() *ShortlyFlags {
 	flag.BoolVar(&fl.EnableHTTPS, "s", false, "enable HTTPS support")
 	flag.StringVar(&fl.ConfigFile, "c", empty, "use config file")
 	flag.StringVar(&fl.TrustedSubnet, "t", empty, "trusted subnet")
-	flag.StringVar(&fl.ConfigFile, "config", fl.ConfigFile, "use config file")
+	flag.StringVar(&fl.ConfigFile, "config", empty, "use config file")
 	flag.Parse()
 	fmt.Println("Config from flags: ", fl)
 	return &fl

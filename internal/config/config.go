@@ -99,7 +99,7 @@ func mappingFlagsToConfig(fl *ShortlyFlags, conf *ServiceConfig) {
 
 func mappingEnvToConfig(conf *ServiceConfig) {
 	if envAddr := os.Getenv("SERVER_ADDRESS"); envAddr != "" {
-		conf.Addr = envAddr
+		conf.Addr = os.Getenv("SERVER_ADDRESS")
 	}
 	if envURLHost := os.Getenv("BASE_URL"); envURLHost != "" {
 		conf.ShortURLHost = envURLHost
