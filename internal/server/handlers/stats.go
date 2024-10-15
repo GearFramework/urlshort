@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"errors"
+	"github.com/GearFramework/urlshort/internal/pkg/auth"
 	"net"
 	"net/http"
 
@@ -16,15 +16,9 @@ type ResponseStats struct {
 	pkg.Stats
 }
 
-var (
-	errTrustedNetworkNotDefined = errors.New("trusted network not defined")
-	errEmptyXRealIP             = errors.New("empty X-Real-IP header")
-	errIPNotFromTrustedNetwork  = errors.New("IP not from trusted network")
-)
-
 // GetInternalStats return internal statistics about short urls and uers
 func GetInternalStats(ctx *gin.Context, api pkg.APIShortener, conf *config.ServiceConfig) {
-	if err := validateUserIP(ctx, conf); err != nil {
+	if err := validateUserIP(ctx, conf.TrustedSubnet); err != nil {
 		logger.Log.Errorf("unauthorized access: %s\n", err)
 		ctx.Status(http.StatusForbidden)
 		return
@@ -35,8 +29,8 @@ func GetInternalStats(ctx *gin.Context, api pkg.APIShortener, conf *config.Servi
 	ctx.JSON(http.StatusOK, stats)
 }
 
-func validateUserIP(ctx *gin.Context, conf *config.ServiceConfig) error {
-	_, trustNet, err := getTrustedIP(conf)
+func validateUserIP(ctx *gin.Context, trustedSubnet string) error {
+	_, trustNet, err := auth.GetTrustedIP(trustedSubnet)
 	if err != nil {
 		return err
 	}
@@ -45,30 +39,15 @@ func validateUserIP(ctx *gin.Context, conf *config.ServiceConfig) error {
 		return err
 	}
 	if !trustNet.Contains(userIP) {
-		return errIPNotFromTrustedNetwork
+		return auth.ErrIPNotFromTrustedNetwork
 	}
 	return nil
-}
-
-func getTrustedIP(conf *config.ServiceConfig) (net.IP, *net.IPNet, error) {
-	if conf.TrustedSubnet == "" {
-		return nil, nil, errTrustedNetworkNotDefined
-	}
-	return parseCIDR(conf.TrustedSubnet)
 }
 
 func getXRealIP(ctx *gin.Context) (net.IP, error) {
 	IP := ctx.Request.Header.Get("X-Real-IP")
 	if IP == "" {
-		return nil, errEmptyXRealIP
+		return nil, auth.ErrEmptyXRealIP
 	}
-	return parseIP(IP), nil
-}
-
-func parseIP(IP string) net.IP {
-	return net.ParseIP(IP)
-}
-
-func parseCIDR(IP string) (net.IP, *net.IPNet, error) {
-	return net.ParseCIDR(IP)
+	return auth.ParseIP(IP), nil
 }

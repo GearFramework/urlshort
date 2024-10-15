@@ -46,16 +46,38 @@ func run() error {
 	if err != nil {
 		return err
 	}
+	errChan := make(chan error)
 	gracefulStop(shortener.StopApp)
-	s, err := server.NewServer(shortener.Conf, shortener)
+	go func() {
+		errChan <- runHTTPServer(shortener)
+	}()
+	go func() {
+		errChan <- runRPCServer(shortener)
+	}()
+	if err = <-errChan; err != nil {
+		return err
+	}
+	return nil
+}
+
+func runHTTPServer(a *app.ShortApp) error {
+	s, err := server.NewServer(a.Conf, a)
 	if err != nil {
 		return err
 	}
 	s.InitRoutes()
-	if shortener.Conf.EnableHTTPS {
+	if a.Conf.EnableHTTPS {
 		return s.UpTLS()
 	}
 	return s.Up()
+}
+
+func runRPCServer(a *app.ShortApp) error {
+	r, err := server.NewRPCServer(a.Conf, a)
+	if err != nil {
+		return err
+	}
+	return r.Up()
 }
 
 func gracefulStop(stopCallback func()) {

@@ -8,6 +8,7 @@ import (
 
 const (
 	defaultAddress       = ":8080"
+	defaultGRPCAddress   = ":8081"
 	defaultShortURL      = "http://localhost:8080"
 	defaultLevel         = "info"
 	defaultStoragePath   = ""
@@ -26,6 +27,7 @@ type ServiceConfig struct {
 	TrustedSubnet   string `json:"trusted_subnet"`
 	EnableHTTPS     bool   `json:"enable_https"`
 	ConfigFile      string
+	GRPCAddress     string `json:"grpc_address"`
 }
 
 // NewConfig constructor of ServiceConfig
@@ -38,6 +40,7 @@ func NewConfig() *ServiceConfig {
 		DatabaseDSN:     defaultDatabaseDSN,
 		EnableHTTPS:     defaultEnableHTTPS,
 		TrustedSubnet:   defaultTrustedSubnet,
+		GRPCAddress:     defaultGRPCAddress,
 	}
 }
 
@@ -95,6 +98,9 @@ func mappingFlagsToConfig(fl *ShortlyFlags, conf *ServiceConfig) {
 	if fl.EnableHTTPS {
 		conf.EnableHTTPS = fl.EnableHTTPS
 	}
+	if fl.GRPCAddr != empty {
+		conf.GRPCAddress = fl.GRPCAddr
+	}
 }
 
 func mappingEnvToConfig(conf *ServiceConfig) {
@@ -118,5 +124,8 @@ func mappingEnvToConfig(conf *ServiceConfig) {
 	}
 	if envTrustedSubnet := os.Getenv("TRUSTED_SUBNET"); envTrustedSubnet != "" {
 		conf.TrustedSubnet = envTrustedSubnet
+	}
+	if envAddr := os.Getenv("GRPC_ADDRESS"); envAddr != "" {
+		conf.GRPCAddress = os.Getenv("GRPC_ADDRESS")
 	}
 }

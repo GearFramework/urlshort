@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/GearFramework/urlshort/internal/app"
@@ -13,7 +14,7 @@ import (
 func DecodeURL(ctx *gin.Context, api pkg.APIShortener) {
 	code := ctx.Param("code")
 	url, err := api.DecodeURL(ctx, code)
-	if err == app.ErrShortURLIsDeleted {
+	if errors.Is(err, app.ErrShortURLIsDeleted) {
 		logger.Log.Errorf("%s\n", err.Error())
 		ctx.Status(http.StatusGone)
 		return

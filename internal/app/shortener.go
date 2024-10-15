@@ -35,6 +35,9 @@ func NewShortener(conf *config.ServiceConfig) (*ShortApp, error) {
 }
 
 func (app *ShortApp) initApp() error {
+	if err := logger.Initialize(app.Conf.LoggerLevel); err != nil {
+		return err
+	}
 	var err error
 	app.Store, err = app.factoryStorage()
 	if err != nil {
