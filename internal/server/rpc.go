@@ -17,8 +17,10 @@ import (
 )
 
 const (
-	keyRPCAuthorization = "Authorization"
+	keyRPCAuthorization authField = "Authorization"
 )
+
+type authField = string
 
 type AuthInterceptor struct {
 	api pkg.APIShortener
