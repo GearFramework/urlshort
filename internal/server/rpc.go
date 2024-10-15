@@ -20,7 +20,7 @@ const (
 	keyRPCAuthorization authField = "Authorization"
 )
 
-type authField = string
+type authField string
 
 type AuthInterceptor struct {
 	api pkg.APIShortener
@@ -34,7 +34,7 @@ func (i *AuthInterceptor) Auth(ctx context.Context, req interface{}, _ *grpc.Una
 	var err error
 	var token string
 	if md, ok := metadata.FromIncomingContext(ctx); ok {
-		values := md.Get(keyRPCAuthorization)
+		values := md.Get("Authorization")
 		if len(values) > 0 {
 			token = values[0]
 			_, err = i.api.Auth(token)
