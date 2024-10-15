@@ -16,6 +16,10 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+const (
+	keyRPCAuthorization = "Authorization"
+)
+
 type AuthInterceptor struct {
 	api pkg.APIShortener
 }
@@ -28,7 +32,7 @@ func (i *AuthInterceptor) Auth(ctx context.Context, req interface{}, _ *grpc.Una
 	var err error
 	var token string
 	if md, ok := metadata.FromIncomingContext(ctx); ok {
-		values := md.Get("Authorization")
+		values := md.Get(keyRPCAuthorization)
 		if len(values) > 0 {
 			token = values[0]
 			_, err = i.api.Auth(token)
@@ -47,7 +51,7 @@ func (i *AuthInterceptor) Auth(ctx context.Context, req interface{}, _ *grpc.Una
 				return nil, status.Error(codes.Unauthenticated, "wrong user id format")
 			}
 		}
-		ctx = context.WithValue(ctx, "Authorization", token)
+		ctx = context.WithValue(ctx, keyRPCAuthorization, token)
 	}
 	return handler(ctx, req)
 }

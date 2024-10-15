@@ -58,7 +58,10 @@ func (s *RPCServer) BatchEncodeURLs(ctx context.Context, in *proto.BatchEncodeUR
 	response := proto.BatchEncodeURLResponse{}
 	batch := []pkg.BatchURLs{}
 	for _, v := range in.Urls {
-		batch = append(batch, pkg.BatchURLs{v.CorrelationId, v.OriginalUrl})
+		batch = append(batch, pkg.BatchURLs{
+			OriginalURL:   v.OriginalUrl,
+			CorrelationID: v.CorrelationId,
+		})
 	}
 	for _, v := range s.api.BatchEncodeURL(ctx, userID, batch) {
 		response.Urls = append(response.Urls, &proto.BatchEncodeURLResponse_BatchURL{
