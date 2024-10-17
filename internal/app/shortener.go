@@ -129,11 +129,21 @@ func (app *ShortApp) ClearShortly() {
 }
 
 // GetStats return internal statistics about short urls and uers
-func (app *ShortApp) GetStats(ctx context.Context) *pkg.Stats {
-	return &pkg.Stats{
-		URLs:  app.Store.Count(ctx),
-		Users: len(app.Store.GetUniqueUsers(ctx)),
+func (app *ShortApp) GetStats(ctx context.Context) (*pkg.Stats, error) {
+	urls, err := app.Store.Count(ctx)
+	if err != nil {
+		logger.Log.Error(err.Error())
+		return nil, err
 	}
+	users, err := app.Store.GetUniqueUsers(ctx)
+	if err != nil {
+		logger.Log.Error(err.Error())
+		return nil, err
+	}
+	return &pkg.Stats{
+		URLs:  urls,
+		Users: users,
+	}, nil
 }
 
 func (app *ShortApp) getRandomString(length int) string {

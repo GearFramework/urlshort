@@ -127,7 +127,11 @@ func (s *RPCServer) GetInternalStats(ctx context.Context, in *proto.GetStatsRequ
 		logger.Log.Errorf("unauthorized access: %s\n", err)
 		return nil, status.Error(codes.PermissionDenied, "Forbidden")
 	}
-	stats := s.api.GetStats(ctx)
+	stats, err := s.api.GetStats(ctx)
+	if err != nil {
+		logger.Log.Errorf("RPC internal stats error: %v\n", err)
+		return nil, status.Error(codes.Internal, err.Error())
+	}
 	return &proto.GetStatsResponse{Urls: int32(stats.URLs), Users: int32(stats.Users)}, nil
 }
 

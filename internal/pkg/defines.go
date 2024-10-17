@@ -54,7 +54,7 @@ type APIShortener interface {
 	GetUserURLs(ctx context.Context, userID int) []UserURL
 	DeleteUserURLs(ctx context.Context, userID int, codes []string)
 	GetShortURL(code string) string
-	GetStats(ctx context.Context) *Stats
+	GetStats(ctx context.Context) (*Stats, error)
 }
 
 // Storable interface of storage urls
@@ -69,8 +69,8 @@ type Storable interface {
 	Insert(ctx context.Context, userID int, url, code string) error
 	InsertBatch(ctx context.Context, userID int, batch [][]string) error
 	DeleteBatch(ctx context.Context, userID int, batch []string)
-	Count(ctx context.Context) int
-	GetUniqueUsers(ctx context.Context) []int
+	Count(ctx context.Context) (int, error)
+	GetUniqueUsers(ctx context.Context) (int, error)
 	Truncate() error
 	Ping() error
 	Close()

@@ -23,10 +23,14 @@ func GetInternalStats(ctx *gin.Context, api pkg.APIShortener, conf *config.Servi
 		ctx.Status(http.StatusForbidden)
 		return
 	}
-	stats := ResponseStats{
-		*api.GetStats(ctx),
+	stats, err := api.GetStats(ctx)
+	if err != nil {
+		ctx.Status(http.StatusInternalServerError)
+		return
 	}
-	ctx.JSON(http.StatusOK, stats)
+	ctx.JSON(http.StatusOK, ResponseStats{
+		*stats,
+	})
 }
 
 func validateUserIP(ctx *gin.Context, trustedSubnet string) error {
