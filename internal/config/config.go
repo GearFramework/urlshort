@@ -7,15 +7,14 @@ import (
 )
 
 const (
-	defaultAddress  = ":8080"
-	defaultShortURL = "http://localhost:8080"
-	defaultLevel    = "info"
-	//defaultStoragePath = "/tmp/short-url-db.json"
-	defaultStoragePath = ""
-	//defaultDatabaseDSN = "postgres://pgadmin:159753@localhost:5432/urlshortly"
-	defaultDatabaseDSN = ""
-	defaultEnableHTTPS = false
-	defaultConfigFile  = ""
+	defaultAddress       = ":8080"
+	defaultGRPCAddress   = ":8081"
+	defaultShortURL      = "http://localhost:8080"
+	defaultLevel         = "info"
+	defaultStoragePath   = ""
+	defaultDatabaseDSN   = ""
+	defaultEnableHTTPS   = false
+	defaultTrustedSubnet = ""
 )
 
 // ServiceConfig struct of application config
@@ -25,8 +24,10 @@ type ServiceConfig struct {
 	LoggerLevel     string
 	StorageFilePath string `json:"file_storage_path"`
 	DatabaseDSN     string `json:"database_dsn"`
+	TrustedSubnet   string `json:"trusted_subnet"`
 	EnableHTTPS     bool   `json:"enable_https"`
 	ConfigFile      string
+	GRPCAddress     string `json:"grpc_address"`
 }
 
 // NewConfig constructor of ServiceConfig
@@ -38,6 +39,8 @@ func NewConfig() *ServiceConfig {
 		StorageFilePath: defaultStoragePath,
 		DatabaseDSN:     defaultDatabaseDSN,
 		EnableHTTPS:     defaultEnableHTTPS,
+		TrustedSubnet:   defaultTrustedSubnet,
+		GRPCAddress:     defaultGRPCAddress,
 	}
 }
 
@@ -78,7 +81,7 @@ func mappingFlagsToConfig(fl *ShortlyFlags, conf *ServiceConfig) {
 		conf.Addr = fl.Addr
 	}
 	if fl.ShortURLHost != empty {
-		conf.ShortURLHost = string(fl.ShortURLHost)
+		conf.ShortURLHost = fl.ShortURLHost
 	}
 	if fl.LogLevel != empty {
 		conf.LoggerLevel = fl.LogLevel
@@ -89,8 +92,14 @@ func mappingFlagsToConfig(fl *ShortlyFlags, conf *ServiceConfig) {
 	if fl.DatabaseDSN != empty {
 		conf.DatabaseDSN = fl.DatabaseDSN
 	}
+	if fl.TrustedSubnet != empty {
+		conf.TrustedSubnet = fl.TrustedSubnet
+	}
 	if fl.EnableHTTPS {
 		conf.EnableHTTPS = fl.EnableHTTPS
+	}
+	if fl.GRPCAddr != empty {
+		conf.GRPCAddress = fl.GRPCAddr
 	}
 }
 
@@ -112,5 +121,11 @@ func mappingEnvToConfig(conf *ServiceConfig) {
 	}
 	if envEnableHTTPS := os.Getenv("ENABLE_HTTPS"); envEnableHTTPS != "" {
 		conf.EnableHTTPS = true
+	}
+	if envTrustedSubnet := os.Getenv("TRUSTED_SUBNET"); envTrustedSubnet != "" {
+		conf.TrustedSubnet = envTrustedSubnet
+	}
+	if envAddr := os.Getenv("GRPC_ADDRESS"); envAddr != "" {
+		conf.GRPCAddress = os.Getenv("GRPC_ADDRESS")
 	}
 }

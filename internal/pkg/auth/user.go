@@ -3,6 +3,7 @@ package auth
 import (
 	"errors"
 	"fmt"
+	"net"
 	"time"
 
 	"github.com/GearFramework/urlshort/internal/pkg/logger"
@@ -17,11 +18,18 @@ const (
 	SecretKey = "bu7HBJD&873HVHJdh*Jbhsfdfs8622Dsf"
 )
 
-// ErrNeedAuthorization error if need authorization
-var ErrNeedAuthorization = errors.New("требуется авторизация")
-
-// ErrInvalidAuthorization error if invalid authorization
-var ErrInvalidAuthorization = errors.New("отсутствует ID пользователя")
+var (
+	// ErrTrustedNetworkNotDefined trusted network not defined
+	ErrTrustedNetworkNotDefined = errors.New("trusted network not defined")
+	// ErrEmptyXRealIP X-Real-IP is undefined
+	ErrEmptyXRealIP = errors.New("empty X-Real-IP header")
+	// ErrIPNotFromTrustedNetwork user IP not from trusted network
+	ErrIPNotFromTrustedNetwork = errors.New("IP not from trusted network")
+	// ErrNeedAuthorization error if need authorization
+	ErrNeedAuthorization = errors.New("требуется авторизация")
+	// ErrInvalidAuthorization error if invalid authorization
+	ErrInvalidAuthorization = errors.New("отсутствует ID пользователя")
+)
 
 // Claims jwt struct
 type Claims struct {
@@ -68,4 +76,22 @@ func getClaims(tk string) (*Claims, error) {
 		return nil, err
 	}
 	return claims, nil
+}
+
+// GetTrustedIP return parsed CIDR
+func GetTrustedIP(trustedSubnet string) (net.IP, *net.IPNet, error) {
+	if trustedSubnet == "" {
+		return nil, nil, ErrTrustedNetworkNotDefined
+	}
+	return ParseCIDR(trustedSubnet)
+}
+
+// ParseIP return result of parsed IP
+func ParseIP(IP string) net.IP {
+	return net.ParseIP(IP)
+}
+
+// ParseCIDR return result of parsed CIDR
+func ParseCIDR(IP string) (net.IP, *net.IPNet, error) {
+	return net.ParseCIDR(IP)
 }

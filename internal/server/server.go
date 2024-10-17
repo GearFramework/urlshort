@@ -21,9 +21,6 @@ type Server struct {
 
 // NewServer return new http server
 func NewServer(c *config.ServiceConfig, api pkg.APIShortener) (*Server, error) {
-	if err := logger.Initialize(c.LoggerLevel); err != nil {
-		return nil, err
-	}
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.New()
 	s := Server{

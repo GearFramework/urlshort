@@ -219,18 +219,29 @@ func (s *Storage) DeleteBatch(ctx context.Context, userID int, batch []string) {
 }
 
 // Count return total count stored shortly urls
-func (s *Storage) Count() int {
+func (s *Storage) Count(ctx context.Context) (int, error) {
 	var count int
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-	if err := s.connection.DB.GetContext(ctx, &count, `
+	err := s.connection.DB.GetContext(ctx, &count, `
         SELECT COUNT(*) AS total_items
           FROM urls.shortly
-    `); err != nil {
-		logger.Log.Error(err.Error())
-		return 0
+    `)
+	if err != nil {
+		return 0, err
 	}
-	return count
+	return count, nil
+}
+
+// GetUniqueUsers return slice of unique user ID
+func (s *Storage) GetUniqueUsers(ctx context.Context) (int, error) {
+	var count int
+	err := s.connection.DB.GetContext(ctx, &count, `
+        SELECT COUNT(DISTINCT user_id) AS total_users
+          FROM urls.shortly
+    `)
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
 }
 
 // Truncate clear all stored shortly urls

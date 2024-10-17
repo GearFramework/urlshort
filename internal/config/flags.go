@@ -15,6 +15,8 @@ type ShortlyFlags struct {
 	LogLevel,
 	StorageFilePath,
 	DatabaseDSN,
+	TrustedSubnet,
+	GRPCAddr,
 	ConfigFile string
 	EnableHTTPS bool
 }
@@ -31,6 +33,8 @@ func ParseFlags() *ShortlyFlags {
 	flag.BoolVar(&fl.EnableHTTPS, "s", false, "enable HTTPS support")
 	flag.StringVar(&fl.ConfigFile, "c", empty, "use config file")
 	flag.StringVar(&fl.ConfigFile, "config", empty, "use config file")
+	flag.StringVar(&fl.TrustedSubnet, "t", empty, "trusted subnet")
+	flag.StringVar(&fl.GRPCAddr, "g", empty, "address to run grpc server")
 	flag.Parse()
 	fmt.Println("Config from flags: ", fl)
 	return &fl

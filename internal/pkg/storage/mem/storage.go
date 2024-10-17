@@ -23,6 +23,7 @@ type Storage struct {
 	sync.RWMutex
 	codeByURL mapCodes
 	urlByCode mapURLs
+	users     map[int]int
 }
 
 var lastUserID int = 0
@@ -97,6 +98,7 @@ func (s *Storage) Insert(ctx context.Context, userID int, url, code string) erro
 	if lastUserID < userID {
 		lastUserID = userID
 	}
+	s.incUserStat(userID, 1)
 	return nil
 }
 
@@ -109,7 +111,16 @@ func (s *Storage) InsertBatch(ctx context.Context, userID int, batch [][]string)
 	if lastUserID < userID {
 		lastUserID = userID
 	}
+	s.incUserStat(userID, len(batch))
 	return nil
+}
+
+func (s *Storage) incUserStat(userID, added int) {
+	if v, ok := s.users[userID]; ok {
+		s.users[userID] = v + added
+	} else {
+		s.users[userID] = added
+	}
 }
 
 // DeleteBatch mark urls as deleted
@@ -126,9 +137,14 @@ func (s *Storage) DeleteBatch(ctx context.Context, userID int, batch []string) {
 	}
 }
 
+// GetUniqueUsers return slice of unique user ID
+func (s *Storage) GetUniqueUsers(ctx context.Context) (int, error) {
+	return len(s.users), nil
+}
+
 // Count return count url in storage
-func (s *Storage) Count() int {
-	return len(s.codeByURL)
+func (s *Storage) Count(ctx context.Context) (int, error) {
+	return len(s.codeByURL), nil
 }
 
 // Truncate clear storage

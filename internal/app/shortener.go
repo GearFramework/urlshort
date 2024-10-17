@@ -35,6 +35,9 @@ func NewShortener(conf *config.ServiceConfig) (*ShortApp, error) {
 }
 
 func (app *ShortApp) initApp() error {
+	if err := logger.Initialize(app.Conf.LoggerLevel); err != nil {
+		return err
+	}
 	var err error
 	app.Store, err = app.factoryStorage()
 	if err != nil {
@@ -123,6 +126,24 @@ func (app *ShortApp) ClearShortly() {
 	if err := app.Store.Truncate(); err != nil {
 		logger.Log.Error(err.Error())
 	}
+}
+
+// GetStats return internal statistics about short urls and uers
+func (app *ShortApp) GetStats(ctx context.Context) (*pkg.Stats, error) {
+	urls, err := app.Store.Count(ctx)
+	if err != nil {
+		logger.Log.Error(err.Error())
+		return nil, err
+	}
+	users, err := app.Store.GetUniqueUsers(ctx)
+	if err != nil {
+		logger.Log.Error(err.Error())
+		return nil, err
+	}
+	return &pkg.Stats{
+		URLs:  urls,
+		Users: users,
+	}, nil
 }
 
 func (app *ShortApp) getRandomString(length int) string {

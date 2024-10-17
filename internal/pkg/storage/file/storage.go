@@ -26,6 +26,7 @@ type Storage struct {
 	Config       *StorageConfig
 	codeByURL    map[string]Codes
 	urlByCode    map[string]string
+	users        map[int]int
 	flushCounter int
 }
 
@@ -55,7 +56,11 @@ func (s *Storage) loadShortlyURLs() error {
 	if err != nil {
 		return err
 	}
-	defer file.Close()
+	defer func() {
+		if errClose := file.Close(); errClose != nil {
+			log.Println(err.Error())
+		}
+	}()
 	if err = json.NewDecoder(file).Decode(&s.codeByURL); err != nil {
 		return err
 	}
@@ -65,8 +70,13 @@ func (s *Storage) loadShortlyURLs() error {
 		if lastUserID < data.UserID {
 			lastUserID = data.UserID
 		}
+		s.incUserStat(data.UserID, 1)
 	}
-	s.flushCounter = s.Count() + s.Config.FlushPerItems
+	c, err := s.Count(context.Background())
+	if err != nil {
+		return err
+	}
+	s.flushCounter = c + s.Config.FlushPerItems
 	return nil
 }
 
@@ -129,13 +139,14 @@ func (s *Storage) Insert(ctx context.Context, userID int, url, code string) erro
 	s.codeByURL[url] = Codes{UserID: userID, Code: code}
 	s.urlByCode[code] = url
 	var err error
-	if s.mustFlush() {
+	if s.mustFlush(ctx) {
 		err = s.flush()
 		s.flushCounter += s.Config.FlushPerItems
 	}
 	if lastUserID < userID {
 		lastUserID = userID
 	}
+	s.incUserStat(userID, 1)
 	return err
 }
 
@@ -145,7 +156,7 @@ func (s *Storage) InsertBatch(ctx context.Context, userID int, batch [][]string)
 		s.codeByURL[pack[0]] = Codes{UserID: userID, Code: pack[1]}
 		s.urlByCode[pack[1]] = pack[0]
 	}
-	if s.mustFlush() {
+	if s.mustFlush(ctx) {
 		if err := s.flush(); err != nil {
 			logger.Log.Warn(err.Error())
 		}
@@ -154,7 +165,16 @@ func (s *Storage) InsertBatch(ctx context.Context, userID int, batch [][]string)
 	if lastUserID < userID {
 		lastUserID = userID
 	}
+	s.incUserStat(userID, len(batch))
 	return nil
+}
+
+func (s *Storage) incUserStat(userID, added int) {
+	if v, ok := s.users[userID]; ok {
+		s.users[userID] = v + added
+	} else {
+		s.users[userID] = added
+	}
 }
 
 // DeleteBatch mark urls as deleted
@@ -171,13 +191,22 @@ func (s *Storage) DeleteBatch(ctx context.Context, userID int, batch []string) {
 	}
 }
 
-func (s *Storage) mustFlush() bool {
-	return s.Count() == s.flushCounter
+func (s *Storage) mustFlush(ctx context.Context) bool {
+	c, err := s.Count(ctx)
+	if err != nil {
+		return false
+	}
+	return c == s.flushCounter
+}
+
+// GetUniqueUsers return slice of unique user ID
+func (s *Storage) GetUniqueUsers(ctx context.Context) (int, error) {
+	return len(s.users), nil
 }
 
 // Count return count url in storage
-func (s *Storage) Count() int {
-	return len(s.codeByURL)
+func (s *Storage) Count(ctx context.Context) (int, error) {
+	return len(s.codeByURL), nil
 }
 
 func (s *Storage) flush() error {
